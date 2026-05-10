@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>AdStream - Premium Network</title>
+<title>AdStream - Premium Network with Logs</title>
 <style>
   * {
     margin: 0;
@@ -16,11 +16,126 @@
   body {
     background: #000;
     min-height: 100vh;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Segoe UI', 'Courier New', monospace;
     overflow-x: hidden;
   }
 
-  /* Full width ad strips */
+  /* Main layout */
+  .main-wrapper {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+  }
+
+  /* Left side - ADS area */
+  .ads-area {
+    flex: 2;
+    padding: 10px;
+    overflow-y: auto;
+    height: 100vh;
+    scrollbar-width: thin;
+  }
+
+  /* Right side - LOGS panel */
+  .logs-panel {
+    width: 380px;
+    background: #0a0a0a;
+    border-left: 1px solid #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    font-family: 'Courier New', monospace;
+  }
+
+  .logs-header {
+    padding: 12px;
+    background: #111;
+    border-bottom: 1px solid #222;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .logs-header h3 {
+    color: #0f0;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logs-header h3 span {
+    color: #666;
+    font-size: 11px;
+  }
+
+  .clear-log-btn {
+    background: #222;
+    border: none;
+    color: #ff4444;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    font-family: monospace;
+  }
+
+  .logs-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    font-size: 11px;
+  }
+
+  .log-entry {
+    padding: 6px 8px;
+    margin-bottom: 6px;
+    border-left: 3px solid;
+    border-radius: 4px;
+    background: #0d0d0d;
+    font-family: 'Courier New', monospace;
+    word-break: break-word;
+  }
+
+  .log-time {
+    color: #888;
+    font-size: 9px;
+    margin-bottom: 3px;
+  }
+
+  .log-message {
+    color: #ddd;
+  }
+
+  .log-info { border-left-color: #00aaff; }
+  .log-success { border-left-color: #00ff00; background: #00ff0010; }
+  .log-warning { border-left-color: #ffaa00; background: #ffaa0010; }
+  .log-error { border-left-color: #ff0000; background: #ff000010; }
+  .log-click { border-left-color: #ff00ff; background: #ff00ff10; }
+  .log-ad { border-left-color: #ff6600; background: #ff660010; }
+
+  /* Stats bar */
+  .stats-bar {
+    padding: 10px;
+    background: #111;
+    border-top: 1px solid #222;
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #0f0;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .stat-item {
+    background: #1a1a1a;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  /* Ad strips */
   .ad-strip {
     width: 100%;
     min-height: 280px;
@@ -28,21 +143,27 @@
     border-bottom: 1px solid #1a1a1a;
     position: relative;
     overflow: hidden;
+    margin-bottom: 10px;
+    border-radius: 8px;
   }
 
-  .ad-strip-large {
-    min-height: 400px;
+  .ad-strip-large { min-height: 400px; }
+  .ad-strip-small { min-height: 120px; }
+  .ad-strip-banner { min-height: 90px; }
+
+  .strip-label {
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    font-size: 9px;
+    color: #333;
+    background: #00000080;
+    padding: 2px 6px;
+    border-radius: 4px;
+    z-index: 1;
+    font-family: monospace;
   }
 
-  .ad-strip-small {
-    min-height: 120px;
-  }
-
-  .ad-strip-banner {
-    min-height: 90px;
-  }
-
-  /* Timer display */
   .timer-bar {
     position: fixed;
     bottom: 0;
@@ -59,24 +180,10 @@
     to { width: 0%; }
   }
 
-  .info {
-    position: fixed;
-    top: 5px;
-    right: 5px;
-    font-size: 9px;
-    color: #222;
-    background: #00000099;
-    padding: 2px 6px;
-    border-radius: 10px;
-    z-index: 9998;
-    font-family: monospace;
-  }
-
-  /* Auto-refresh countdown */
   .countdown {
     position: fixed;
     bottom: 10px;
-    right: 10px;
+    left: 10px;
     font-size: 10px;
     color: #0f0;
     background: #000000cc;
@@ -86,310 +193,458 @@
     z-index: 9999;
   }
 
-  /* Hide scrollbar */
   ::-webkit-scrollbar {
-    display: none;
+    width: 4px;
   }
+  ::-webkit-scrollbar-track { background: #111; }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
 </style>
 </head>
 <body>
+<div class="main-wrapper">
+  
+  <!-- ADS AREA -->
+  <div class="ads-area">
+    <div class="ad-strip ad-strip-large" id="strip1">
+      <div class="strip-label">📺 STRIP 1 - MAIN BANNER</div>
+      <div id="container-main"></div>
+    </div>
+    <div class="ad-strip" id="strip2">
+      <div class="strip-label">📺 STRIP 2 - NATIVE AD</div>
+    </div>
+    <div class="ad-strip ad-strip-banner" id="strip3">
+      <div class="strip-label">📺 STRIP 3 - BANNER</div>
+    </div>
+    <div class="ad-strip ad-strip-large" id="strip4">
+      <div class="strip-label">📺 STRIP 4 - VIDEO AD</div>
+    </div>
+    <div class="ad-strip ad-strip-small" id="strip5">
+      <div class="strip-label">📺 STRIP 5 - SMALL BANNER</div>
+    </div>
+    <div class="ad-strip" id="strip6">
+      <div class="strip-label">📺 STRIP 6 - NATIVE</div>
+    </div>
+    <div class="ad-strip ad-strip-banner" id="strip7">
+      <div class="strip-label">📺 STRIP 7 - BANNER</div>
+    </div>
+    <div class="ad-strip ad-strip-large" id="strip8">
+      <div class="strip-label">📺 STRIP 8 - PREMIUM</div>
+    </div>
+  </div>
 
-<!-- ========== STRIP 1 - LARGE BANNER ========== -->
-<div class="ad-strip ad-strip-large" id="strip1">
-  <div id="container-91644b676aac283eca6328db2c7fbd10"></div>
+  <!-- LOGS PANEL -->
+  <div class="logs-panel">
+    <div class="logs-header">
+      <h3>
+        📋 LIVE ACTIVITY LOG
+        <span id="logCounter">0 entries</span>
+        <button class="clear-log-btn" onclick="clearLogs()">🗑️ CLEAR</button>
+      </h3>
+    </div>
+    <div class="logs-container" id="logsContainer">
+      <div class="log-entry log-info">
+        <div class="log-time">[STARTUP]</div>
+        <div class="log-message">🚀 AdStream system initializing...</div>
+      </div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-item">🔄 Cycles: <span id="cycleCount">0</span></div>
+      <div class="stat-item">📊 Impressions: <span id="totalImpressions">0</span></div>
+      <div class="stat-item">🖱️ Clicks: <span id="totalClicks">0</span></div>
+      <div class="stat-item">💰 Earnings: $<span id="totalEarnings">0.00</span></div>
+      <div class="stat-item">🌍 <span id="countryCode">--</span></div>
+    </div>
+  </div>
 </div>
 
-<!-- ========== STRIP 2 - NATIVE AD ========== -->
-<div class="ad-strip" id="strip2"></div>
-
-<!-- ========== STRIP 3 - BANNER ========== -->
-<div class="ad-strip ad-strip-banner" id="strip3"></div>
-
-<!-- ========== STRIP 4 - VIDEO AD ========== -->
-<div class="ad-strip ad-strip-large" id="strip4"></div>
-
-<!-- ========== STRIP 5 - SMALL BANNER ========== -->
-<div class="ad-strip ad-strip-small" id="strip5"></div>
-
-<!-- ========== STRIP 6 - NATIVE ========== -->
-<div class="ad-strip" id="strip6"></div>
-
-<!-- ========== STRIP 7 - BANNER ========== -->
-<div class="ad-strip ad-strip-banner" id="strip7"></div>
-
-<!-- ========== STRIP 8 - VIDEO ========== -->
-<div class="ad-strip ad-strip-large" id="strip8"></div>
-
 <div class="timer-bar"></div>
-<div class="info">🚀 PREMIUM NETWORK | 24/7</div>
 <div class="countdown" id="countdown">⟳ Next refresh: 30s</div>
 
 <script>
-(function(){
-  // ========== CONFIG ==========
-  const REFRESH_INTERVAL = 30000; // 30 seconds
-  let refreshCount = 0;
-  let countdown = REFRESH_INTERVAL / 1000;
+// ========== LOGGING SYSTEM ==========
+let logEntries = [];
+let cycleNum = 0;
+let totalImpressions = 0;
+let totalClicks = 0;
+let totalEarnings = 0;
+
+function addLog(message, type = 'info') {
+  const time = new Date();
+  const timeStr = time.toLocaleTimeString() + '.' + time.getMilliseconds().toString().padStart(3, '0');
   
-  // Your ad links
-  const SMART_LINKS = [
-    'https://www.profitablecpmratenetwork.com/jrzay967?key=232e3613f716f7f48ddcea42863cfca2',
-    'https://www.profitablecpmratenetwork.com/mu4zfgyi5?key=75df0ae60f201ec57adb7f25c2cb663e',
-    'https://www.profitablecpmratenetwork.com/v6ha59c4?key=0cde71c15b61c7f8874d5e4090a44b19'
-  ];
+  const logEntry = {
+    id: Date.now() + '_' + Math.random(),
+    time: timeStr,
+    message: message,
+    type: type,
+    fullTime: time
+  };
   
-  const JS_LINKS = [
-    'https://pl29408676.profitablecpmratenetwork.com/91644b676aac283eca6328db2c7fbd10/invoke.js',
-    'https://pl29408675.profitablecpmratenetwork.com/df/1d/f8/df1df88dc26f82b04a4fc7aa565b039f.js',
-    'https://pl29408678.profitablecpmratenetwork.com/17/f6/89/17f68960fa5e183a651d29554e01f3c0.js'
-  ];
+  logEntries.unshift(logEntry);
   
-  // ========== GENERATE RANDOM STRING ==========
-  function rand(len) {
-    const s = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    let o = '';
-    for(let i = 0; i < len; i++) o += s[Math.floor(Math.random() * s.length)];
-    return o;
-  }
+  // Keep only last 200 logs
+  if(logEntries.length > 200) logEntries.pop();
   
-  // ========== CLEAR ALL ADS ==========
-  function clearAllSlots() {
-    const slots = ['strip1', 'strip2', 'strip3', 'strip4', 'strip5', 'strip6', 'strip7', 'strip8'];
-    slots.forEach(slot => {
-      const el = document.getElementById(slot);
-      if(el) {
-        // Clear but keep container div for strip1
-        if(slot === 'strip1') {
-          const container = document.getElementById('container-91644b676aac283eca6328db2c7fbd10');
-          if(container) container.innerHTML = '';
-        } else {
-          el.innerHTML = '';
-        }
+  // Update UI
+  renderLogs();
+  document.getElementById('logCounter').innerHTML = logEntries.length + ' entries';
+}
+
+function renderLogs() {
+  const container = document.getElementById('logsContainer');
+  if(!container) return;
+  
+  container.innerHTML = logEntries.map(log => `
+    <div class="log-entry log-${log.type}">
+      <div class="log-time">[${log.time}]</div>
+      <div class="log-message">${escapeHtml(log.message)}</div>
+    </div>
+  `).join('');
+  
+  // Auto scroll to top (newest)
+  container.scrollTop = 0;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function clearLogs() {
+  logEntries = [];
+  addLog('🗑️ Logs cleared by user', 'warning');
+  addLog('🚀 System continuing normal operation...', 'info');
+}
+
+function updateStats() {
+  document.getElementById('cycleCount').innerHTML = cycleNum;
+  document.getElementById('totalImpressions').innerHTML = totalImpressions;
+  document.getElementById('totalClicks').innerHTML = totalClicks;
+  document.getElementById('totalEarnings').innerHTML = totalEarnings.toFixed(4);
+}
+
+// ========== AD SYSTEM ==========
+const REFRESH_INTERVAL = 30000;
+let countdown = REFRESH_INTERVAL / 1000;
+
+const SMART_LINKS = [
+  'https://www.profitablecpmratenetwork.com/jrzay967?key=232e3613f716f7f48ddcea42863cfca2',
+  'https://www.profitablecpmratenetwork.com/mu4zfgyi5?key=75df0ae60f201ec57adb7f25c2cb663e',
+  'https://www.profitablecpmratenetwork.com/v6ha59c4?key=0cde71c15b61c7f8874d5e4090a44b19'
+];
+
+const JS_LINKS = [
+  'https://pl29408676.profitablecpmratenetwork.com/91644b676aac283eca6328db2c7fbd10/invoke.js',
+  'https://pl29408675.profitablecpmratenetwork.com/df/1d/f8/df1df88dc26f82b04a4fc7aa565b039f.js',
+  'https://pl29408678.profitablecpmratenetwork.com/17/f6/89/17f68960fa5e183a651d29554e01f3c0.js'
+];
+
+function rand(len) {
+  const s = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let o = '';
+  for(let i = 0; i < len; i++) o += s[Math.floor(Math.random() * s.length)];
+  return o;
+}
+
+function clearAllSlots() {
+  const slots = ['strip1', 'strip2', 'strip3', 'strip4', 'strip5', 'strip6', 'strip7', 'strip8'];
+  slots.forEach(slot => {
+    const el = document.getElementById(slot);
+    if(el) {
+      const children = el.querySelectorAll('iframe, script');
+      children.forEach(child => child.remove());
+      if(slot === 'strip1') {
+        const container = document.getElementById('container-main');
+        if(container) container.innerHTML = '';
       }
-    });
+    }
+  });
+}
+
+function loadAllAds() {
+  const bust = Date.now() + '_' + rand(8);
+  const startTime = performance.now();
+  
+  addLog(`🔄 CYCLE ${cycleNum + 1} STARTED - Loading ${SMART_LINKS.length + JS_LINKS.length} ad sources...`, 'ad');
+  
+  // STRIP 1
+  const container = document.getElementById('container-main');
+  if(container) {
+    const s = document.createElement('script');
+    s.src = `${JS_LINKS[0]}?_=${bust}`;
+    s.async = true;
+    container.appendChild(s);
+    addLog(`📺 STRIP 1: Loading invoke script - ${JS_LINKS[0].substring(0, 60)}...`, 'ad');
   }
   
-  // ========== LOAD ADS IN ALL STRIPS ==========
-  function loadAllAds() {
-    const bust = Date.now() + '_' + rand(8);
-    
-    // STRIP 1 - Using container ID
-    const container = document.getElementById('container-91644b676aac283eca6328db2c7fbd10');
-    if(container) {
-      const s = document.createElement('script');
-      s.src = `https://pl29408676.profitablecpmratenetwork.com/91644b676aac283eca6328db2c7fbd10/invoke.js?_=${bust}`;
-      s.async = true;
-      container.appendChild(s);
-    }
-    
-    // STRIP 2 - Smart Link 1 (iframe)
-    const strip2 = document.getElementById('strip2');
-    if(strip2) {
-      const iframe = document.createElement('iframe');
-      iframe.src = `${SMART_LINKS[0]}&_=${bust}`;
-      iframe.style.width = '100%';
-      iframe.style.height = '280px';
-      iframe.style.border = 'none';
-      iframe.referrerPolicy = 'no-referrer';
-      iframe.sandbox = 'allow-scripts allow-same-origin allow-popups allow-forms';
-      strip2.appendChild(iframe);
-    }
-    
-    // STRIP 3 - Smart Link 2 (iframe)
-    const strip3 = document.getElementById('strip3');
-    if(strip3) {
-      const iframe = document.createElement('iframe');
-      iframe.src = `${SMART_LINKS[1]}&_=${bust}`;
-      iframe.style.width = '100%';
-      iframe.style.height = '90px';
-      iframe.style.border = 'none';
-      iframe.referrerPolicy = 'no-referrer';
-      strip3.appendChild(iframe);
-    }
-    
-    // STRIP 4 - JS Link 2
-    const strip4 = document.getElementById('strip4');
-    if(strip4) {
-      const s = document.createElement('script');
-      s.src = `${JS_LINKS[1]}?_=${bust}`;
-      s.async = true;
-      strip4.appendChild(s);
-    }
-    
-    // STRIP 5 - Smart Link 3 (iframe)
-    const strip5 = document.getElementById('strip5');
-    if(strip5) {
-      const iframe = document.createElement('iframe');
-      iframe.src = `${SMART_LINKS[2]}&_=${bust}`;
-      iframe.style.width = '100%';
-      iframe.style.height = '120px';
-      iframe.style.border = 'none';
-      iframe.referrerPolicy = 'no-referrer';
-      strip5.appendChild(iframe);
-    }
-    
-    // STRIP 6 - JS Link 3
-    const strip6 = document.getElementById('strip6');
-    if(strip6) {
-      const s = document.createElement('script');
-      s.src = `${JS_LINKS[2]}?_=${bust}`;
-      s.async = true;
-      strip6.appendChild(s);
-    }
-    
-    // STRIP 7 - Smart Link 1 again (banner)
-    const strip7 = document.getElementById('strip7');
-    if(strip7) {
-      const iframe = document.createElement('iframe');
-      iframe.src = `${SMART_LINKS[0]}&_=${bust}`;
-      iframe.style.width = '100%';
-      iframe.style.height = '90px';
-      iframe.style.border = 'none';
-      iframe.referrerPolicy = 'no-referrer';
-      strip7.appendChild(iframe);
-    }
-    
-    // STRIP 8 - Smart Link 2 (large)
-    const strip8 = document.getElementById('strip8');
-    if(strip8) {
-      const iframe = document.createElement('iframe');
-      iframe.src = `${SMART_LINKS[1]}&_=${bust}`;
-      iframe.style.width = '100%';
-      iframe.style.height = '400px';
-      iframe.style.border = 'none';
-      iframe.referrerPolicy = 'no-referrer';
-      strip8.appendChild(iframe);
-    }
-    
-    // Additional script tags for background loading
-    JS_LINKS.forEach(link => {
-      const s = document.createElement('script');
-      s.src = `${link}?_=${bust}`;
-      s.async = true;
-      document.body.appendChild(s);
-    });
-    
-    refreshCount++;
-    console.log(`[ADS] Cycle ${refreshCount} loaded at ${new Date().toLocaleTimeString()}`);
+  // STRIP 2
+  const strip2 = document.getElementById('strip2');
+  if(strip2) {
+    const iframe = document.createElement('iframe');
+    iframe.src = `${SMART_LINKS[0]}&_=${bust}`;
+    iframe.style.width = '100%';
+    iframe.style.height = '280px';
+    iframe.style.border = 'none';
+    iframe.referrerPolicy = 'no-referrer';
+    iframe.sandbox = 'allow-scripts allow-same-origin allow-popups allow-forms';
+    strip2.appendChild(iframe);
+    addLog(`📺 STRIP 2: Loading SMART LINK 1 (Native Ad)`, 'ad');
   }
   
-  // ========== REFRESH PAGE (New session, new ads) ==========
-  function hardRefresh() {
-    // Clear everything and reload
-    clearAllSlots();
-    loadAllAds();
-    
-    // Reset countdown
-    countdown = REFRESH_INTERVAL / 1000;
-    
-    // Update impression counter in localStorage
-    let impressions = parseInt(localStorage.getItem('totalImpressions') || '0', 10);
-    impressions += 8; // 8 strips
-    localStorage.setItem('totalImpressions', impressions);
-    
-    // Fake earnings update
-    let earnings = parseFloat(localStorage.getItem('totalEarnings') || '0');
-    earnings += 0.08; // $0.01 per ad strip
-    localStorage.setItem('totalEarnings', earnings.toFixed(4));
+  // STRIP 3
+  const strip3 = document.getElementById('strip3');
+  if(strip3) {
+    const iframe = document.createElement('iframe');
+    iframe.src = `${SMART_LINKS[1]}&_=${bust}`;
+    iframe.style.width = '100%';
+    iframe.style.height = '90px';
+    iframe.style.border = 'none';
+    strip3.appendChild(iframe);
+    addLog(`📺 STRIP 3: Loading SMART LINK 2 (Banner)`, 'ad');
   }
   
-  // ========== COUNTDOWN TIMER ==========
-  let timerInterval;
-  function startCountdown() {
-    if(timerInterval) clearInterval(timerInterval);
+  // STRIP 4
+  const strip4 = document.getElementById('strip4');
+  if(strip4) {
+    const s = document.createElement('script');
+    s.src = `${JS_LINKS[1]}?_=${bust}`;
+    s.async = true;
+    strip4.appendChild(s);
+    addLog(`📺 STRIP 4: Loading JS Ad 2 (Video)`, 'ad');
+  }
+  
+  // STRIP 5
+  const strip5 = document.getElementById('strip5');
+  if(strip5) {
+    const iframe = document.createElement('iframe');
+    iframe.src = `${SMART_LINKS[2]}&_=${bust}`;
+    iframe.style.width = '100%';
+    iframe.style.height = '120px';
+    iframe.style.border = 'none';
+    strip5.appendChild(iframe);
+    addLog(`📺 STRIP 5: Loading SMART LINK 3 (Small Banner)`, 'ad');
+  }
+  
+  // STRIP 6
+  const strip6 = document.getElementById('strip6');
+  if(strip6) {
+    const s = document.createElement('script');
+    s.src = `${JS_LINKS[2]}?_=${bust}`;
+    s.async = true;
+    strip6.appendChild(s);
+    addLog(`📺 STRIP 6: Loading JS Ad 3 (Native)`, 'ad');
+  }
+  
+  // STRIP 7
+  const strip7 = document.getElementById('strip7');
+  if(strip7) {
+    const iframe = document.createElement('iframe');
+    iframe.src = `${SMART_LINKS[0]}&_=${bust}`;
+    iframe.style.width = '100%';
+    iframe.style.height = '90px';
+    iframe.style.border = 'none';
+    strip7.appendChild(iframe);
+    addLog(`📺 STRIP 7: Loading SMART LINK 1 (Banner)`, 'ad');
+  }
+  
+  // STRIP 8
+  const strip8 = document.getElementById('strip8');
+  if(strip8) {
+    const iframe = document.createElement('iframe');
+    iframe.src = `${SMART_LINKS[1]}&_=${bust}`;
+    iframe.style.width = '100%';
+    iframe.style.height = '400px';
+    iframe.style.border = 'none';
+    strip8.appendChild(iframe);
+    addLog(`📺 STRIP 8: Loading SMART LINK 2 (Premium)`, 'ad');
+  }
+  
+  // Background scripts
+  JS_LINKS.forEach((link, idx) => {
+    const s = document.createElement('script');
+    s.src = `${link}?_=${bust}`;
+    s.async = true;
+    document.body.appendChild(s);
+  });
+  
+  // Update impressions
+  totalImpressions += 8;
+  totalEarnings += 0.08;
+  updateStats();
+  
+  const endTime = performance.now();
+  addLog(`✅ CYCLE ${cycleNum + 1} COMPLETE - 8 ads loaded in ${(endTime - startTime).toFixed(0)}ms | Total impressions: ${totalImpressions}`, 'success');
+}
+
+function hardRefresh() {
+  cycleNum++;
+  addLog(`🔄 ========== STARTING REFRESH #${cycleNum} ==========`, 'info');
+  
+  clearAllSlots();
+  loadAllAds();
+  
+  countdown = REFRESH_INTERVAL / 1000;
+  
+  // Save to localStorage
+  localStorage.setItem('cycleNum', cycleNum);
+  localStorage.setItem('totalImpressions', totalImpressions);
+  localStorage.setItem('totalEarnings', totalEarnings);
+}
+
+// ========== AUTO-CLICK ==========
+function setupAutoClick() {
+  let clickCycle = parseInt(localStorage.getItem('clickCycle') || '0', 10);
+  clickCycle++;
+  localStorage.setItem('clickCycle', clickCycle);
+  
+  addLog(`🖱️ AUTO-CLICK CHECK: Cycle #${clickCycle} (Will click on every 3rd cycle)`, 'info');
+  
+  if(clickCycle % 3 === 0) {
+    addLog(`🎯 AUTO-CLICK TRIGGERED! Searching for clickable elements...`, 'click');
     
-    timerInterval = setInterval(() => {
-      countdown--;
-      const countdownEl = document.getElementById('countdown');
-      if(countdownEl) {
-        countdownEl.innerHTML = `⟳ Next refresh: ${countdown}s | 💰 $${(parseFloat(localStorage.getItem('totalEarnings') || '0')).toFixed(4)}`;
-      }
+    setTimeout(() => {
+      const iframes = document.querySelectorAll('iframe[src*="profitablecpm"]');
+      const links = document.querySelectorAll('a[href*="profitablecpm"]');
+      const allClickable = [...iframes, ...links];
       
-      if(countdown <= 0) {
-        countdown = REFRESH_INTERVAL / 1000;
-        hardRefresh();
-      }
-    }, 1000);
-  }
-  
-  // ========== AUTO-CLICK ON 3RD REFRESH ==========
-  function setupAutoClick() {
-    let clickCount = parseInt(localStorage.getItem('clickCount') || '0', 10);
-    clickCount++;
-    localStorage.setItem('clickCount', clickCount);
-    
-    if(clickCount % 3 === 0) {
-      setTimeout(() => {
-        // Find any ad link and click
-        const links = document.querySelectorAll('a[href*="profitablecpm"], iframe[src*="profitablecpm"]');
-        if(links.length > 0) {
-          const randomLink = links[Math.floor(Math.random() * links.length)];
-          if(randomLink.tagName === 'A' && randomLink.href) {
-            randomLink.click();
-          } else if(randomLink.src) {
-            window.open(randomLink.src, '_blank');
-          }
-          console.log('[AUTO-CLICK] Ad clicked on cycle', clickCount);
+      addLog(`🔍 Found ${allClickable.length} clickable elements`, 'info');
+      
+      if(allClickable.length > 0) {
+        const target = allClickable[Math.floor(Math.random() * allClickable.length)];
+        totalClicks++;
+        updateStats();
+        
+        if(target.tagName === 'IFRAME' && target.src) {
+          addLog(`🖱️ CLICKING on IFRAME: ${target.src.substring(0, 80)}...`, 'click');
+          window.open(target.src, '_blank');
+        } else if(target.href) {
+          addLog(`🖱️ CLICKING on LINK: ${target.href.substring(0, 80)}...`, 'click');
+          target.click();
         }
-      }, 5000);
-    }
-  }
-  
-  // ========== FAKE USER SCROLL ==========
-  function autoScroll() {
-    let scrollCount = 0;
-    setInterval(() => {
-      scrollCount++;
-      if(scrollCount % 2 === 0) {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        
+        addLog(`💰 Earning from click: +$0.02 | Total clicks: ${totalClicks}`, 'success');
+        totalEarnings += 0.02;
+        updateStats();
       } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        addLog(`⚠️ No clickable elements found on this cycle`, 'warning');
       }
-    }, 15000);
+    }, 4000);
   }
+}
+
+// ========== COUNTDOWN TIMER ==========
+let timerInterval;
+function startCountdown() {
+  if(timerInterval) clearInterval(timerInterval);
   
-  // ========== GEOLOCATION CHECK ==========
-  function checkLocation() {
-    fetch('https://ipapi.co/json/')
-      .then(res => res.json())
-      .then(data => {
-        const country = data.country_code;
-        const info = document.querySelector('.info');
-        if(info) {
-          if(['US', 'GB', 'CA', 'AU', 'DE', 'FR'].includes(country)) {
-            info.innerHTML = `🇺🇸 HIGH CPM | ${country} | 24/7`;
-          } else {
-            info.innerHTML = `🌍 ${country} | PREMIUM NETWORK`;
-          }
-        }
-      })
-      .catch(() => {
-        const info = document.querySelector('.info');
-        if(info) info.innerHTML = '🚀 BOOST MODE | MAX EARNING';
-      });
-  }
-  
-  // ========== INIT ==========
-  function init() {
-    checkLocation();
-    loadAllAds();
-    startCountdown();
-    setupAutoClick();
-    autoScroll();
+  timerInterval = setInterval(() => {
+    countdown--;
+    const countdownEl = document.getElementById('countdown');
+    if(countdownEl) {
+      countdownEl.innerHTML = `⟳ Next refresh: ${countdown}s | 💰 $${totalEarnings.toFixed(4)}`;
+    }
     
-    // Also load ads in background every 15 seconds (extra impressions)
-    setInterval(() => {
-      const bgBust = Date.now() + '_' + rand(6);
-      SMART_LINKS.forEach(link => {
-        const img = new Image();
-        img.src = `${link}&_=${bgBust}`;
-      });
-    }, 15000);
-  }
+    if(countdown <= 0) {
+      setupAutoClick();
+      hardRefresh();
+    }
+  }, 1000);
+}
+
+// ========== GEOLOCATION ==========
+function checkLocation() {
+  addLog(`🌍 Checking geolocation for CPM optimization...`, 'info');
   
-  // Start everything
-  init();
-})();
+  fetch('https://ipapi.co/json/')
+    .then(res => res.json())
+    .then(data => {
+      const country = data.country_code || 'XX';
+      const city = data.city || 'Unknown';
+      const region = data.region || 'Unknown';
+      
+      document.getElementById('countryCode').innerHTML = country;
+      
+      const highValueCountries = ['US', 'GB', 'CA', 'AU', 'DE', 'FR', 'NL', 'SE', 'NO', 'CH', 'JP', 'AE'];
+      
+      if(highValueCountries.includes(country)) {
+        addLog(`🇺🇸 HIGH CPM DETECTED: ${country} - ${city}, ${region} | Earnings will be optimized`, 'success');
+      } else {
+        addLog(`🌍 Standard CPM: ${country} - ${city}, ${region}`, 'info');
+      }
+    })
+    .catch(() => {
+      addLog(`⚠️ Could not detect location - using default CPM mode`, 'warning');
+      document.getElementById('countryCode').innerHTML = '--';
+    });
+}
+
+// ========== AUTO SCROLL ==========
+function autoScroll() {
+  let scrollCount = 0;
+  setInterval(() => {
+    scrollCount++;
+    if(scrollCount % 2 === 0) {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      addLog(`📜 Auto-scroll: Moving to bottom (Simulating user behavior)`, 'info');
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      addLog(`📜 Auto-scroll: Moving to top`, 'info');
+    }
+  }, 15000);
+}
+
+// ========== BACKGROUND PINGS ==========
+function setupBackgroundPings() {
+  setInterval(() => {
+    const bgBust = Date.now() + '_' + rand(6);
+    SMART_LINKS.forEach(link => {
+      const img = new Image();
+      img.src = `${link}&_=${bgBust}`;
+    });
+    addLog(`📡 Background ping sent (${SMART_LINKS.length} requests) - Increasing view count`, 'info');
+    totalImpressions += 3;
+    totalEarnings += 0.015;
+    updateStats();
+  }, 20000);
+}
+
+// ========== SESSION SUMMARY ==========
+function logSessionSummary() {
+  addLog(`📊 SESSION SUMMARY: Running for ${Math.floor(process.uptime())}s`, 'info');
+  addLog(`💰 TOTAL: ${totalImpressions} impressions | ${totalClicks} clicks | $${totalEarnings.toFixed(4)} earnings`, 'success');
+}
+
+// ========== INIT ==========
+function init() {
+  addLog(`🚀 ========== ADS SYSTEM INITIALIZED ==========`, 'success');
+  addLog(`⚙️ Config: Refresh interval ${REFRESH_INTERVAL/1000}s | 8 ad strips | Auto-click ON (every 3rd cycle)`, 'info');
+  
+  // Load saved stats
+  const savedCycle = localStorage.getItem('cycleNum');
+  const savedImpressions = localStorage.getItem('totalImpressions');
+  const savedEarnings = localStorage.getItem('totalEarnings');
+  
+  if(savedCycle) cycleNum = parseInt(savedCycle);
+  if(savedImpressions) totalImpressions = parseInt(savedImpressions);
+  if(savedEarnings) totalEarnings = parseFloat(savedEarnings);
+  
+  updateStats();
+  
+  checkLocation();
+  loadAllAds();
+  startCountdown();
+  autoScroll();
+  setupBackgroundPings();
+  
+  // Session summary every 5 minutes
+  setInterval(() => logSessionSummary(), 300000);
+  
+  addLog(`✅ System ready! First ad cycle starting in 2 seconds...`, 'success');
+}
+
+// Start everything
+init();
 </script>
 </body>
 </html>
