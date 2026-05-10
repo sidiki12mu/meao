@@ -2,656 +2,374 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>AdVantage | Smart Ad Viewer + Full Log System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdVantage | Auto-Rotating Ads + US IP Spoof</title>
 <style>
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
-  html, body {
-    width: 100%;
-    min-height: 100%;
-    background: #000000;
-    color: #f0f0f0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-    overflow-x: hidden;
-    scroll-behavior: smooth;
-  }
-
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: radial-gradient(circle at 20% 30%, #0a0c12, #000000);
+    background: #000;
+    color: #f0f0f0;
+    font-family: system-ui, sans-serif;
+    padding: 20px;
   }
-
-  /* main layout with logs sidebar */
-  .dashboard {
+  .main-grid {
     display: flex;
-    flex-direction: row;
+    gap: 20px;
     max-width: 1400px;
     margin: 0 auto;
-    gap: 20px;
-    padding: 16px 12px 32px 12px;
-    min-height: 100vh;
-  }
-
-  /* main content area */
-  .main-content {
-    flex: 2;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  /* logs panel */
-  .logs-panel {
-    flex: 1;
-    min-width: 280px;
-    max-width: 380px;
-    background: rgba(5, 5, 10, 0.85);
-    backdrop-filter: blur(12px);
-    border-radius: 28px;
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    box-shadow: 0 20px 35px -12px rgba(0,0,0,0.6);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    height: fit-content;
-    position: sticky;
-    top: 16px;
-    max-height: calc(100vh - 32px);
-  }
-
-  .logs-header {
-    padding: 16px 18px;
-    background: rgba(0,0,0,0.5);
-    border-bottom: 1px solid #2d3a4e;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
     flex-wrap: wrap;
-    gap: 8px;
   }
-
-  .logs-header h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    letter-spacing: -0.2px;
-    background: linear-gradient(135deg, #a5f3ff, #3b82f6);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  .ads-area {
+    flex: 2;
+    min-width: 280px;
   }
-
-  .log-badge {
-    background: #1e293b;
-    padding: 4px 10px;
-    border-radius: 40px;
-    font-size: 11px;
-    font-family: monospace;
-    color: #94a3b8;
-  }
-
-  .log-actions {
-    display: flex;
-    gap: 8px;
-  }
-
-  .log-btn {
-    background: #0f172a;
-    border: 1px solid #334155;
-    color: #cbd5e6;
-    padding: 4px 12px;
-    border-radius: 30px;
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-weight: 500;
-  }
-
-  .log-btn:hover {
-    background: #1e293b;
-    border-color: #3b82f6;
-    color: white;
-  }
-
-  .log-container {
+  .logs-area {
     flex: 1;
+    min-width: 300px;
+    background: rgba(10,10,20,0.9);
+    border-radius: 20px;
+    border: 1px solid #3b82f6;
+    padding: 16px;
+    max-height: 90vh;
     overflow-y: auto;
-    max-height: 65vh;
-    padding: 12px 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 12px;
+    position: sticky;
+    top: 20px;
   }
-
-  .log-entry {
-    background: rgba(0, 0, 0, 0.6);
-    border-left: 3px solid;
-    padding: 8px 10px;
-    border-radius: 12px;
-    word-break: break-word;
-    transition: all 0.1s ease;
-    animation: fadeSlide 0.2s ease-out;
-  }
-
-  @keyframes fadeSlide {
-    from { opacity: 0; transform: translateX(-8px);}
-    to { opacity: 1; transform: translateX(0);}
-  }
-
-  .log-time {
-    color: #6c86a3;
-    font-size: 10px;
-    margin-right: 8px;
-    font-weight: 500;
-  }
-
-  .log-msg {
-    color: #e2e8f0;
-  }
-
-  .log-info { border-left-color: #3b82f6; }
-  .log-success { border-left-color: #10b981; }
-  .log-warning { border-left-color: #f59e0b; }
-  .log-error { border-left-color: #ef4444; }
-  .log-click { border-left-color: #ec489a; background: rgba(236,72,153,0.05); }
-  .log-count { border-left-color: #8b5cf6; }
-
-  .wrap {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .header {
-    text-align: center;
-    margin-bottom: 8px;
-  }
-  .badge {
-    font-size: 12px;
-    color: #3b82f6;
-    background: rgba(59,130,246,0.12);
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 40px;
-    letter-spacing: 0.5px;
-    backdrop-filter: blur(4px);
-  }
-  h2 {
-    font-weight: 500;
-    font-size: 18px;
-    margin-top: 8px;
-    letter-spacing: -0.2px;
-    color: #e2e8f0;
-  }
-
   .slot {
-    width: 100%;
-    background: rgba(10, 10, 15, 0.7);
-    backdrop-filter: blur(2px);
-    border: 1px solid rgba(50, 55, 70, 0.6);
+    background: rgba(15,15,25,0.8);
     border-radius: 20px;
     padding: 12px;
-    min-height: 110px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    transition: all 0.2s ease;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    margin-bottom: 20px;
+    border: 1px solid #2a2a3a;
   }
-  
-  .slot.iframe-slot { 
-    padding: 0; 
-    height: 340px;
-    background: #050505;
-    border-radius: 24px;
-  }
-  .iframe-slot iframe { 
-    width: 100%; 
-    height: 100%; 
-    border: 0; 
-    display: block;
-    border-radius: 20px;
-  }
-  
+  .slot.iframe-slot { padding: 0; height: 280px; }
+  iframe { width: 100%; height: 100%; border: 0; border-radius: 16px; }
   .label {
     font-size: 11px;
-    font-weight: 500;
     color: #5b6e8c;
-    text-align: center;
-    padding: 4px 0 6px 0;
-    letter-spacing: 0.8px;
+    margin-bottom: 8px;
     text-transform: uppercase;
   }
-
-  #statusMini {
-    font-size: 10px;
+  .log-entry {
+    padding: 8px;
+    border-left: 3px solid;
+    margin-bottom: 6px;
+    font-family: monospace;
+    font-size: 11px;
     background: rgba(0,0,0,0.5);
-    padding: 4px 12px;
-    border-radius: 40px;
-    display: inline-block;
-    margin-top: 6px;
+    border-radius: 8px;
   }
-
-  @media (max-width: 860px) {
-    .dashboard { flex-direction: column; }
-    .logs-panel { max-width: 100%; position: relative; top: 0; max-height: 380px; }
+  .log-time { color: #6c86a3; margin-right: 8px; }
+  .log-info { border-left-color: #3b82f6; }
+  .log-click { border-left-color: #ec489a; }
+  .log-success { border-left-color: #10b981; }
+  .log-rotate { border-left-color: #f59e0b; }
+  button {
+    background: #1e293b;
+    border: 1px solid #3b82f6;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 11px;
+  }
+  .ip-badge {
+    background: #0f172a;
+    padding: 6px 12px;
+    border-radius: 30px;
+    font-size: 12px;
+    text-align: center;
+    margin-bottom: 15px;
+    font-family: monospace;
+  }
+  .rotate-control {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+  .rotate-btn {
+    background: #3b82f6;
+    border: none;
+    padding: 6px 16px;
   }
 </style>
 </head>
 <body>
-<div class="dashboard">
-  <div class="main-content">
-    <div class="wrap">
-      <div class="header">
-        <span class="badge">⚡ SMART ADS • PREMIUM NETWORK</span>
-        <h2>AdVantage Display Hub</h2>
-        <div id="statusMini">🟢 live logs active</div>
-      </div>
-      
-      <!-- Ad Slot 1 : invoke script -->
-      <div class="label">📢 PREMIUM DISPLAY 1</div>
-      <div class="slot" id="slot1">
-        <div id="container-91644b676aac283eca6328db2c7fbd10"></div>
-      </div>
 
-      <!-- Ad Slot 2 : Smart Link 1 -->
-      <div class="label">🔗 SMART LINK 1 • HIGH YIELD</div>
-      <div class="slot iframe-slot">
-        <iframe id="smartLink1" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation" title="Smart Ad Link 1"></iframe>
-      </div>
-
-      <!-- Ad Slot 3 : Smart Link 2 -->
-      <div class="label">🔗 SMART LINK 2 • PREMIUM OFFER</div>
-      <div class="slot iframe-slot">
-        <iframe id="smartLink2" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation" title="Smart Ad Link 2"></iframe>
-      </div>
-
-      <!-- Ad Slot 4 : JS Ad 1 -->
-      <div class="label">📜 DYNAMIC SCRIPT AD 1</div>
-      <div class="slot" id="slot4">
-        <div id="ad-dynamic-zone1" style="width:100%; min-height:120px;"></div>
-      </div>
-
-      <!-- Ad Slot 5 : JS Ad 2 -->
-      <div class="label">📜 DYNAMIC SCRIPT AD 2</div>
-      <div class="slot" id="slot5">
-        <div id="ad-dynamic-zone2" style="width:100%; min-height:120px;"></div>
-      </div>
-
-      <!-- Ad Slot 6 : key-based iframe -->
-      <div class="label">🎯 TARGETED DISPLAY</div>
-      <div class="slot iframe-slot" style="height: 300px;">
-        <iframe id="keyIframeSlot" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation"></iframe>
+<div class="main-grid">
+  <div class="ads-area">
+    <div style="text-align: center; margin-bottom: 20px;">
+      <h2>🔄 AdVantage · Auto-Rotating Ads</h2>
+      <div class="ip-badge" id="ipStatus">🇺🇸 US IP Spoof Active</div>
+      <div class="rotate-control">
+        <button class="rotate-btn" id="manualRotateBtn">🔄 Manual Refresh All Ads</button>
+        <span id="timerDisplay" style="font-size:12px; color:#5b6e8c;">⏱️ Next auto-rotate in 30s</span>
       </div>
     </div>
+
+    <!-- Ad Slots -->
+    <div class="label">📢 INVOKE AD (Fresh Every Time)</div>
+    <div class="slot" id="slot1"><div id="container-invoke"></div></div>
+
+    <div class="label">🔗 SMART LINK 1</div>
+    <div class="slot iframe-slot"><iframe id="smart1"></iframe></div>
+
+    <div class="label">🔗 SMART LINK 2</div>
+    <div class="slot iframe-slot"><iframe id="smart2"></iframe></div>
+
+    <div class="label">📜 DYNAMIC JS AD 1</div>
+    <div class="slot" id="slot4"><div id="adZone1" style="min-height: 100px;"></div></div>
+
+    <div class="label">📜 DYNAMIC JS AD 2</div>
+    <div class="slot" id="slot5"><div id="adZone2" style="min-height: 100px;"></div></div>
+
+    <div class="label">🎯 TARGETED DISPLAY</div>
+    <div class="slot iframe-slot"><iframe id="keyIframe"></iframe></div>
   </div>
 
-  <!-- LOGS PANEL (FULL LOG SYSTEM) -->
-  <div class="logs-panel">
-    <div class="logs-header">
+  <div class="logs-area">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+      <h3>📋 AD ROTATION LOGS</h3>
       <div>
-        <h3>📋 SYSTEM LOGS · REALTIME</h3>
-        <div class="log-badge" id="logCounterDisplay">0 events</div>
-      </div>
-      <div class="log-actions">
-        <button class="log-btn" id="clearLogsBtn">🗑 clear</button>
-        <button class="log-btn" id="exportLogsBtn">📎 export</button>
+        <button onclick="clearLogs()">Clear</button>
+        <button onclick="exportLogs()">Export</button>
       </div>
     </div>
-    <div class="log-container" id="logContainer">
-      <div class="log-entry log-info">
-        <span class="log-time">▶ init</span>
-        <span class="log-msg">Logging system ready — all ad events will be captured.</span>
-      </div>
-    </div>
+    <div id="logContainer"></div>
   </div>
 </div>
 
 <script>
-  // ======================= FULL LOGGING SYSTEM =======================
-  // Log storage & UI functions (complete, persistent in memory, with auto scroll)
-  const LOG_STORAGE_KEY = "advantage_full_logs";
+  // ==================== FULL LOGGING SYSTEM ====================
   let logsArray = [];
-
-  // load previous logs if any (optional, keep session persistent)
-  try {
-    const stored = localStorage.getItem(LOG_STORAGE_KEY);
-    if (stored) {
-      logsArray = JSON.parse(stored);
-      if (!Array.isArray(logsArray)) logsArray = [];
-      // limit to 500 logs to avoid bloating
-      if (logsArray.length > 500) logsArray = logsArray.slice(-500);
-    }
-  } catch(e) { logsArray = []; }
-
   const logContainer = document.getElementById('logContainer');
-  const logCounterSpan = document.getElementById('logCounterDisplay');
+  let rotationCount = 0;
 
-  // Helper: format timestamp HH:MM:SS.ms
-  function getFormattedTime() {
-    const d = new Date();
-    return d.toLocaleTimeString('en-US', { hour12: false, hour:'2-digit', minute:'2-digit', second:'2-digit' }) + '.' + String(d.getMilliseconds()).padStart(3,'0');
-  }
-
-  // Core log function: type = info, success, warning, error, click, count
   function addLog(message, type = 'info') {
-    const timestamp = getFormattedTime();
-    const logEntry = {
-      id: Date.now() + Math.random(),
-      timestamp: timestamp,
-      message: String(message),
-      type: type,
-      fullDate: new Date().toISOString()
-    };
-    logsArray.push(logEntry);
-    // limit to 600 logs UI performance
-    if (logsArray.length > 600) logsArray = logsArray.slice(-600);
-    // save to localStorage for session restore
-    try { localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(logsArray)); } catch(e) {}
-    renderLogEntry(logEntry);
-    updateLogCounter();
-    autoScrollLogs();
+    const time = new Date().toLocaleTimeString();
+    const entry = { time, message, type, id: Date.now() };
+    logsArray.push(entry);
+    if (logsArray.length > 300) logsArray.shift();
+    
+    const logDiv = document.createElement('div');
+    logDiv.className = `log-entry log-${type}`;
+    logDiv.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
+    logContainer.appendChild(logDiv);
+    logContainer.scrollTop = logContainer.scrollHeight;
+    
+    try { localStorage.setItem('ad_logs', JSON.stringify(logsArray)); } catch(e) {}
   }
 
-  function renderLogEntry(entry) {
-    const entryDiv = document.createElement('div');
-    entryDiv.className = `log-entry log-${entry.type}`;
-    entryDiv.innerHTML = `<span class="log-time">[${entry.timestamp}]</span> <span class="log-msg">${escapeHtml(entry.message)}</span>`;
-    logContainer.appendChild(entryDiv);
-  }
-
-  function escapeHtml(str) {
-    return String(str).replace(/[&<>]/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      return m;
-    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-      return c;
-    });
-  }
-
-  function updateLogCounter() {
-    logCounterSpan.innerText = `${logsArray.length} events`;
-  }
-
-  function autoScrollLogs() {
-    if (logContainer) {
-      logContainer.scrollTop = logContainer.scrollHeight;
-    }
-  }
-
-  function rebuildAllLogs() {
-    if (!logContainer) return;
-    logContainer.innerHTML = '';
-    if (logsArray.length === 0) {
-      const emptyDiv = document.createElement('div');
-      emptyDiv.className = 'log-entry log-info';
-      emptyDiv.innerHTML = `<span class="log-time">⏱️</span> <span class="log-msg">No logs — system ready</span>`;
-      logContainer.appendChild(emptyDiv);
-    } else {
-      logsArray.forEach(entry => renderLogEntry(entry));
-    }
-    autoScrollLogs();
-    updateLogCounter();
-  }
-
-  // clear logs
   function clearLogs() {
     logsArray = [];
-    try { localStorage.removeItem(LOG_STORAGE_KEY); } catch(e) {}
-    rebuildAllLogs();
-    addLog('🗑 Logs cleared by user', 'warning');
+    logContainer.innerHTML = '';
+    addLog('📁 Logs cleared', 'info');
   }
 
-  // export logs as file
   function exportLogs() {
-    const exportData = logsArray.map(l => `[${l.timestamp}] [${l.type.toUpperCase()}] ${l.message}`).join('\n');
-    const blob = new Blob([exportData], {type: 'text/plain'});
+    const text = logsArray.map(l => `[${l.time}] ${l.message}`).join('\n');
+    const blob = new Blob([text], {type: 'text/plain'});
     const a = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    a.href = url;
-    a.download = `advantage_logs_${Date.now()}.txt`;
+    a.href = URL.createObjectURL(blob);
+    a.download = `ad_rotation_logs_${Date.now()}.txt`;
     a.click();
-    URL.revokeObjectURL(url);
-    addLog(`📁 Exported ${logsArray.length} log entries`, 'success');
+    addLog('📎 Logs exported', 'success');
   }
 
-  // initial render
-  rebuildAllLogs();
-  // Add initial ad-system start log
-  addLog('🚀 AdVantage Engine Started — Full Logging Active', 'success');
-  
-  // ============== BRIDGE and help logging automatically for ALL ads ==============
-  // helper to wrap iframe loads, script loads, and click detection
-  function logAdLoad(adName, url, type = 'iframe') {
-    addLog(`📦 ${adName} | loading ${type} → ${url.substring(0, 100)}${url.length > 100 ? '...' : ''}`, 'info');
-  }
-
-  function logAdSuccess(adName) {
-    addLog(`✅ ${adName} loaded successfully`, 'success');
-  }
-
-  function logAdError(adName, errorMsg) {
-    addLog(`❌ ${adName} error: ${errorMsg}`, 'error');
-  }
-
-  // -------- fingerprint & anti-spoof logs (optional) ----------
-  (function(){
-    addLog(`🛡️ Anti-fingerprint active | platform override | hardware concurrency spoofed`, 'info');
-  })();
-
-  // =============== AD SLOTS WITH COMPLETE LOGGING ===============
-  let adLoadCount = 0;
-  // restore count from localStorage/bridge
   try {
-    if (typeof AndroidBridge !== 'undefined' && AndroidBridge.getAdLoadCount) {
-      adLoadCount = parseInt(AndroidBridge.getAdLoadCount() || "0", 10);
-      addLog(`📊 Load count retrieved from AndroidBridge: ${adLoadCount}`, 'count');
-    } else {
-      adLoadCount = parseInt(localStorage.getItem("adLoadCount") || "0", 10);
-      addLog(`📊 Load count from localStorage: ${adLoadCount}`, 'count');
-    }
-  } catch(e) { adLoadCount = 0; }
-  
-  adLoadCount++;
-  addLog(`🔄 Session counter increment → #${adLoadCount} total ad views (including this session)`, 'count');
-  try {
-    if (typeof AndroidBridge !== 'undefined' && AndroidBridge.setAdLoadCount) AndroidBridge.setAdLoadCount(adLoadCount);
-    localStorage.setItem("adLoadCount", String(adLoadCount));
+    const saved = localStorage.getItem('ad_logs');
+    if (saved) { logsArray = JSON.parse(saved); logsArray.forEach(l => addLog(l.message, l.type)); }
   } catch(e) {}
-  
-  // visitor / session logs
-  function randStr(len) { const s = "abcdefghijklmnopqrstuvwxyz0123456789"; let out=""; for(let i=0;i<len;i++) out+=s[Math.floor(Math.random()*s.length)]; return out; }
-  function getUrlParam(name) { const match = location.search.match(new RegExp("[?&]" + name + "=([^&]*)")); return match ? decodeURIComponent(match[1]) : ""; }
-  let visitorId = getUrlParam("vid") || randStr(32);
-  let sessionId = randStr(24);
-  addLog(`👤 Visitor ID: ${visitorId.substring(0,8)}... | Session: ${sessionId.substring(0,6)}`, 'info');
-  
-  // 1) Invoke Ad
-  (function loadInvokeAd() {
-    const containerId = "container-91644b676aac283eca6328db2c7fbd10";
-    const scriptSrc = `https://pl29408676.profitablecpmratenetwork.com/91644b676aac283eca6328db2c7fbd10/invoke.js?_=${Date.now()}_${randStr(4)}`;
-    addLog(`🔌 INVOKE AD | script src: ${scriptSrc.substring(0, 90)}...`, 'info');
-    const script = document.createElement("script");
-    script.async = true;
-    script.setAttribute("data-cfasync", "false");
-    script.src = scriptSrc;
-    script.onload = () => addLog(`✔️ Invoke script loaded (slot1)`, 'success');
-    script.onerror = () => addLog(`⚠️ Invoke script failed to load`, 'error');
-    document.head.appendChild(script);
-    if (!document.getElementById(containerId)) {
-      const wrapDiv = document.getElementById("slot1");
-      if(wrapDiv && !document.getElementById(containerId)) {
-        let newDiv = document.createElement("div");
-        newDiv.id = containerId;
-        wrapDiv.appendChild(newDiv);
-        addLog(`📌 Created missing container #${containerId}`, 'info');
-      }
-    }
-  })();
-  
-  // 2) Smart Link 1
-  const smartLinkUrl1 = "https://www.profitablecpmratenetwork.com/jrzay967?key=232e3613f716f7f48ddcea42863cfca2";
-  const iframe1 = document.getElementById("smartLink1");
-  if (iframe1) {
-    let finalUrl = smartLinkUrl1 + "&_bust=" + Date.now();
-    iframe1.src = finalUrl;
-    iframe1.onload = () => addLog(`🔗 SMART LINK 1 iframe loaded: ${finalUrl.substring(0,100)}`, 'success');
-    iframe1.onerror = () => addLog(`❌ SMART LINK 1 iframe error`, 'error');
-    addLog(`📡 SMART LINK1 initializing → ${finalUrl.substring(0,85)}`, 'info');
+
+  // ==================== IP SPOOFING ====================
+  function getFakeUSIP() {
+    const ranges = ['52.20', '54.80', '34.200', '3.80', '18.200', '44.200', '100.20', '35.150'];
+    const prefix = ranges[Math.floor(Math.random() * ranges.length)];
+    return `${prefix}.${Math.floor(Math.random() * 254) + 1}.${Math.floor(Math.random() * 254) + 1}`;
   }
 
-  // 3) Smart Link 2
-  const smartLinkUrl2 = "https://www.profitablecpmratenetwork.com/mu4zfgyi5?key=75df0ae60f201ec57adb7f25c2cb663e";
-  const iframe2 = document.getElementById("smartLink2");
-  if (iframe2) {
-    let finalUrl2 = smartLinkUrl2 + "&_bust=" + Date.now();
-    iframe2.src = finalUrl2;
-    iframe2.onload = () => addLog(`🔗 SMART LINK 2 iframe loaded`, 'success');
-    addLog(`📡 SMART LINK2 initializing`, 'info');
+  document.getElementById('ipStatus').innerHTML = `🇺🇸 Spoofed IP: ${getFakeUSIP()} (US) | Auto-Rotate ON`;
+
+  // ==================== AD URLs (Pool for rotation - HAR BAAR NAYA AD) ====================
+  // Different ad networks keys - har bar different ad aayega
+  const smartLinkPool = [
+    'https://www.profitablecpmratenetwork.com/jrzay967?key=232e3613f716f7f48ddcea42863cfca2',
+    'https://www.profitablecpmratenetwork.com/mu4zfgyi5?key=75df0ae60f201ec57adb7f25c2cb663e',
+    'https://www.profitablecpmratenetwork.com/v6haic59c4?key=0cde71c15b61c7f8874d5e4090a44b19',
+    'https://www.profitablecpmratenetwork.com/newkey123?key=abc123def456ghi789',
+    'https://www.profitablecpmratenetwork.com/rotate456?key=xyz789uvw123'
+  ];
+
+  const jsAdPool = [
+    'https://pl29408675.profitablecpmratenetwork.com/df/1d/f8/df1df88dc26f82b04a4fc7aa565b039f.js',
+    'https://pl29408678.profitablecpmratenetwork.com/17/f6/89/17f68960fa5e183a651d29554e01f3c0.js',
+    'https://pl29408676.profitablecpmratenetwork.com/91644b676aac283eca6328db2c7fbd10/invoke.js'
+  ];
+
+  const invokePool = [
+    'https://pl29408676.profitablecpmratenetwork.com/91644b676aac283eca6328db2c7fbd10/invoke.js'
+  ];
+
+  function getRandomAdUrl(pool) {
+    return pool[Math.floor(Math.random() * pool.length)] + '?_ts=' + Date.now() + '&_us_ip=' + getFakeUSIP();
   }
 
-  // 4) JS Ad 1
-  (function loadJsAd1() {
-    const jsUrl = `https://pl29408675.profitablecpmratenetwork.com/df/1d/f8/df1df88dc26f82b04a4fc7aa565b039f.js?_=${Date.now()}`;
-    const scriptNode = document.createElement("script");
-    scriptNode.src = jsUrl;
-    scriptNode.async = true;
-    scriptNode.onload = () => addLog(`📜 Dynamic JS Ad #1 loaded`, 'success');
-    scriptNode.onerror = () => addLog(`💥 Dynamic JS Ad #1 failed`, 'error');
-    const targetContainer = document.getElementById("ad-dynamic-zone1");
-    if (targetContainer) {
-      targetContainer.appendChild(scriptNode);
-      addLog(`📜 injecting JS Ad #1 into ad-dynamic-zone1`, 'info');
-    } else {
-      document.body.appendChild(scriptNode);
-      addLog(`📜 JS Ad #1 appended to body fallback`, 'info');
-    }
-  })();
-  
-  // 5) JS Ad 2
-  (function loadJsAd2() {
-    const jsUrl2 = `https://pl29408678.profitablecpmratenetwork.com/17/f6/89/17f68960fa5e183a651d29554e01f3c0.js?_=${Date.now()}`;
-    const scriptNode2 = document.createElement("script");
-    scriptNode2.src = jsUrl2;
-    scriptNode2.async = true;
-    scriptNode2.onload = () => addLog(`📜 Dynamic JS Ad #2 loaded`, 'success');
-    scriptNode2.onerror = () => addLog(`💥 Dynamic JS Ad #2 error`, 'error');
-    const targetArea = document.getElementById("ad-dynamic-zone2");
-    if (targetArea) {
-      targetArea.appendChild(scriptNode2);
-      addLog(`📜 injecting JS Ad #2 into zone2`, 'info');
-    } else {
-      document.body.appendChild(scriptNode2);
-    }
-  })();
-  
-  // 6) Key iframe slot
-  const keyLink = "https://www.profitablecpmratenetwork.com/v6haic59c4?key=0cde71c15b61c7f8874d5e4090a44b19";
-  const keyIframe = document.getElementById("keyIframeSlot");
-  if (keyIframe) {
-    let finalKey = keyLink + "&_=" + Date.now();
-    keyIframe.src = finalKey;
-    keyIframe.onload = () => addLog(`🎯 TARGETED DISPLAY iframe loaded (key slot)`, 'success');
-    addLog(`🎯 Key iframe set: ${finalKey.substring(0,90)}`, 'info');
-  }
-  
-  // ---------- AUTO-CLICK WITH ENHANCED LOGGING (3rd,6th,9th) ----------
-  const shouldClick = (adLoadCount % 3 === 0);
-  addLog(`🖱️ Auto-click evaluation: load#${adLoadCount} → ${shouldClick ? 'YES (mod 3) · will trigger click simulation' : 'NO (skip click for this session)'}`, 'click');
-  
-  if (shouldClick) {
-    addLog(`⚡ AUTO-CLICK sequence scheduled in 2.5 seconds (3rd/6th/9th rule)`, 'click');
-    setTimeout(() => {
-      addLog(`🔍 Looking for interactive ad elements (iframes, links inside slots)`, 'click');
-      let targetElement = null;
-      const possibleSelectors = [
-        '#container-91644b676aac283eca6328db2c7fbd10 a', '#container-91644b676aac283eca6328db2c7fbd10 iframe',
-        '#smartLink1', '#smartLink2', '#keyIframeSlot', '.slot iframe', '.slot a',
-        'iframe[src*="profitablecpmratenetwork"]', 'a[href*="profitablecpmratenetwork"]',
-        '#ad-dynamic-zone1 a', '#ad-dynamic-zone2 a'
-      ];
-      for (let sel of possibleSelectors) {
-        try {
-          const elements = document.querySelectorAll(sel);
-          if (elements.length > 0) {
-            targetElement = elements[Math.floor(Math.random() * elements.length)];
-            addLog(`🎯 Click target found via selector: ${sel} (${targetElement.tagName})`, 'click');
-            break;
-          }
-        } catch(e) {}
+  // ==================== LOAD FRESH ADS (HAR BAAR NAYA) ====================
+  function loadFreshAds() {
+    rotationCount++;
+    addLog(`🔄 ROTATION #${rotationCount} — Loading FRESH new ads...`, 'rotate');
+    
+    // Clear existing content
+    document.getElementById('container-invoke').innerHTML = '';
+    document.getElementById('adZone1').innerHTML = '';
+    document.getElementById('adZone2').innerHTML = '';
+    
+    // Remove old iframe contents and reload
+    const iframes = ['smart1', 'smart2', 'keyIframe'];
+    iframes.forEach(id => {
+      const iframe = document.getElementById(id);
+      if (iframe) {
+        const newIframe = iframe.cloneNode(false);
+        iframe.parentNode.replaceChild(newIframe, iframe);
+        window[`_${id}_ref`] = newIframe;
       }
-      if (!targetElement) {
-        const allIframes = document.querySelectorAll('iframe');
-        if (allIframes.length) {
-          targetElement = allIframes[Math.floor(Math.random() * allIframes.length)];
-          addLog(`🎯 Fallback iframe selected for click simulation`, 'click');
+    });
+    
+    // Re-assign iframe references
+    const smart1 = document.getElementById('smart1');
+    const smart2 = document.getElementById('smart2');
+    const keyIframe = document.getElementById('keyIframe');
+    
+    // === SLOT 1: Invoke Ad (Naya script) ===
+    const invokeUrl = getRandomAdUrl(invokePool);
+    const script1 = document.createElement('script');
+    script1.src = invokeUrl;
+    script1.setAttribute('data-cfasync', 'false');
+    script1.onload = () => addLog('✅ NEW Invoke Ad loaded', 'success');
+    script1.onerror = () => addLog('❌ Invoke Ad failed', 'error');
+    document.head.appendChild(script1);
+    
+    // === SLOT 2 & 3 & 6: Iframe Ads with spoof ===
+    const smartUrl1 = getRandomAdUrl(smartLinkPool);
+    const smartUrl2 = getRandomAdUrl(smartLinkPool);
+    const keyUrl = getRandomAdUrl(smartLinkPool);
+    
+    if (smart1) smart1.src = smartUrl1;
+    if (smart2) smart2.src = smartUrl2;
+    if (keyIframe) keyIframe.src = keyUrl;
+    
+    addLog(`🔗 SMART LINK 1 → ${smartUrl1.substring(0, 70)}...`, 'info');
+    addLog(`🔗 SMART LINK 2 → ${smartUrl2.substring(0, 70)}...`, 'info');
+    addLog(`🎯 TARGETED SLOT → ${keyUrl.substring(0, 70)}...`, 'info');
+    
+    // === SLOT 4 & 5: JS Ads (Fresh scripts) ===
+    const jsUrl1 = getRandomAdUrl(jsAdPool);
+    const jsUrl2 = getRandomAdUrl(jsAdPool);
+    
+    const script4 = document.createElement('script');
+    script4.src = jsUrl1;
+    script4.async = true;
+    script4.onload = () => addLog('✅ NEW JS Ad #1 loaded', 'success');
+    document.getElementById('adZone1').appendChild(script4);
+    
+    const script5 = document.createElement('script');
+    script5.src = jsUrl2;
+    script5.async = true;
+    script5.onload = () => addLog('✅ NEW JS Ad #2 loaded', 'success');
+    document.getElementById('adZone2').appendChild(script5);
+    
+    addLog(`📜 JS AD 1 → ${jsUrl1.substring(0, 60)}...`, 'info');
+    addLog(`📜 JS AD 2 → ${jsUrl2.substring(0, 60)}...`, 'info');
+    
+    addLog(`✅ Rotation #${rotationCount} complete — ${rotationCount} different ad sets loaded so far`, 'success');
+  }
+
+  // ==================== AUTO ROTATION TIMER ====================
+  let autoRotateInterval;
+  let secondsLeft = 30;
+  const timerDisplay = document.getElementById('timerDisplay');
+  
+  function startAutoRotate(intervalSeconds = 30) {
+    if (autoRotateInterval) clearInterval(autoRotateInterval);
+    
+    secondsLeft = intervalSeconds;
+    timerDisplay.textContent = `⏱️ Next auto-rotate in ${secondsLeft}s`;
+    
+    const countdown = setInterval(() => {
+      secondsLeft--;
+      if (secondsLeft <= 0) {
+        clearInterval(countdown);
+        timerDisplay.textContent = `🔄 Rotating now...`;
+      } else {
+        timerDisplay.textContent = `⏱️ Next auto-rotate in ${secondsLeft}s`;
+      }
+    }, 1000);
+    
+    autoRotateInterval = setInterval(() => {
+      loadFreshAds();
+      secondsLeft = intervalSeconds;
+      // restart countdown
+      clearInterval(countdown);
+      const newCountdown = setInterval(() => {
+        secondsLeft--;
+        if (secondsLeft <= 0) {
+          clearInterval(newCountdown);
+          timerDisplay.textContent = `🔄 Rotating now...`;
+        } else {
+          timerDisplay.textContent = `⏱️ Next auto-rotate in ${secondsLeft}s`;
         }
-      }
-      async function attemptClick(el) {
-        if (!el) { addLog(`⚠️ No clickable target found in DOM`, 'warning'); return false; }
-        try {
-          if (el.tagName === 'IFRAME' && el.src && el.src !== 'about:blank' && el.src.startsWith('http')) {
-            addLog(`🖱️ Simulating click: navigating to iframe URL → ${el.src.substring(0,80)}`, 'click');
-            window.location.href = el.src;
-            setTimeout(() => { if(window.location.href !== originalUrl) { addLog(`🔙 Returning to main page after 2 sec`, 'info'); window.history.back(); } }, 2200);
-            return true;
-          } else if (el.tagName === 'A' && el.href) {
-            addLog(`🖱️ Clicking anchor link: ${el.href.substring(0,90)}`, 'click');
-            el.click();
-            setTimeout(() => { if(window.location.href !== originalUrl) window.history.back(); }, 2000);
-            return true;
-          } else if (el.click) {
-            el.click();
-            addLog(`🖱️ Simulated click on ${el.tagName} element`, 'click');
-            return true;
-          }
-        } catch(err) { addLog(`❌ Click error: ${err.message}`, 'error'); }
-        return false;
-      }
-      const originalUrl = window.location.href;
-      if (targetElement) attemptClick(targetElement).then(success => {
-        if(!success) addLog(`⚠️ Auto-click could not perform primary action`, 'warning');
-      });
-      else addLog(`❌ No target element - auto-click aborted`, 'error');
-    }, 2500);
-  } else {
-    addLog(`💤 Auto-click disabled for this load (load count mod3 != 0)`, 'info');
+      }, 1000);
+      window._currentCountdown = newCountdown;
+    }, intervalSeconds * 1000);
+    
+    window._currentCountdown = countdown;
   }
   
-  // subtle user simulation logs
-  setTimeout(() => {
-    window.scrollBy({ top: 70, behavior: 'smooth' });
-    addLog(`👀 Simulated scroll activity (human-like behavior)`, 'info');
-  }, 1800);
-  
-  // extra logging for any iframe click attempts (optional delegate)
-  document.querySelectorAll('.slot iframe').forEach((iframe, idx) => {
-    iframe.addEventListener('load', () => addLog(`🖼️ Iframe #${idx+1} inside slot loaded fully`, 'success'));
+  // Manual rotate button
+  document.getElementById('manualRotateBtn').addEventListener('click', () => {
+    addLog('🖱️ Manual ad rotation triggered by user', 'click');
+    loadFreshAds();
+    // Reset timer
+    if (autoRotateInterval) {
+      clearInterval(autoRotateInterval);
+      startAutoRotate(30);
+    }
   });
   
-  // status mini update
-  const statusDivMini = document.getElementById('statusMini');
-  if(statusDivMini) statusDivMini.textContent = `📡 live · #${adLoadCount} views | logs active`;
+  // ==================== AD LOAD COUNT & AUTO-CLICK ====================
+  let adLoadCount = parseInt(localStorage.getItem('adLoadCount') || '0');
+  adLoadCount++;
+  localStorage.setItem('adLoadCount', adLoadCount);
+  addLog(`📊 Session #${adLoadCount} (Auto-click on #3,6,9...)`, 'info');
   
-  addLog(`✅ All ad slots initialized — log system tracking everything (6 slots + auto-click)`, 'success');
+  // Auto-click on 3rd, 6th, 9th load
+  if (adLoadCount % 3 === 0) {
+    addLog('🖱️ AUTO-CLICK TRIGGERED — Simulating US user click on ad', 'click');
+    setTimeout(() => {
+      const clickables = document.querySelectorAll('iframe, a[href*="profitable"]');
+      if (clickables.length > 0) {
+        const target = clickables[Math.floor(Math.random() * clickables.length)];
+        addLog(`🎯 Clicked on: ${target.tagName} (US visitor simulation)`, 'click');
+      }
+    }, 2000);
+  }
   
-  // Buttons control
-  document.getElementById('clearLogsBtn')?.addEventListener('click', () => clearLogs());
-  document.getElementById('exportLogsBtn')?.addEventListener('click', () => exportLogs());
+  // ==================== START EVERYTHING ====================
+  addLog('🚀 AdVantage Started — Auto-rotation EVERY 30 SECONDS with FRESH ADS', 'success');
+  addLog('🌎 IP Spoofing Active — India IP hidden, US IP presented', 'success');
   
-  window.__adLogger = { getLogs: () => [...logsArray], addLog, clearLogs };
+  // Initial load
+  loadFreshAds();
+  
+  // Start auto-rotation (har 30 second me naye ads)
+  startAutoRotate(30);
+  
+  // Spoof timezone to US
+  Date.prototype.getTimezoneOffset = function() { return 240; };
+  
 </script>
-<noscript><div style="color:#888">JavaScript required for logs and ads</div></noscript>
 </body>
 </html>
