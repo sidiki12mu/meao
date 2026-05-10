@@ -1,421 +1,395 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AdVantage Pro | 24/7 Ad Network</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>AdStream - Premium Network</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
-            min-height: 100vh;
-            color: #fff;
-        }
+  body {
+    background: #000;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow-x: hidden;
+  }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+  /* Full width ad strips */
+  .ad-strip {
+    width: 100%;
+    min-height: 280px;
+    background: #0a0a0a;
+    border-bottom: 1px solid #1a1a1a;
+    position: relative;
+    overflow: hidden;
+  }
 
-        .header {
-            text-align: center;
-            padding: 30px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-        }
+  .ad-strip-large {
+    min-height: 400px;
+  }
 
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
+  .ad-strip-small {
+    min-height: 120px;
+  }
 
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1em;
-        }
+  .ad-strip-banner {
+    min-height: 90px;
+  }
 
-        .status-badge {
-            display: inline-block;
-            background: #00ff88;
-            color: #000;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-top: 10px;
-        }
+  /* Timer display */
+  .timer-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #00ff0044;
+    animation: progress 30s linear infinite;
+    z-index: 9999;
+  }
 
-        .ads-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
+  @keyframes progress {
+    from { width: 100%; }
+    to { width: 0%; }
+  }
 
-        .ad-card {
-            background: rgba(255,255,255,0.05);
-            border-radius: 15px;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.3s ease;
-        }
+  .info {
+    position: fixed;
+    top: 5px;
+    right: 5px;
+    font-size: 9px;
+    color: #222;
+    background: #00000099;
+    padding: 2px 6px;
+    border-radius: 10px;
+    z-index: 9998;
+    font-family: monospace;
+  }
 
-        .ad-card:hover {
-            transform: translateY(-5px);
-        }
+  /* Auto-refresh countdown */
+  .countdown {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    font-size: 10px;
+    color: #0f0;
+    background: #000000cc;
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-family: monospace;
+    z-index: 9999;
+  }
 
-        .ad-header {
-            background: rgba(0,0,0,0.5);
-            padding: 12px 15px;
-            font-size: 12px;
-            color: #aaa;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .ad-content {
-            padding: 20px;
-            min-height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .full-width-ad {
-            background: rgba(255,255,255,0.05);
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 25px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .footer {
-            text-align: center;
-            padding: 20px;
-            margin-top: 40px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            font-size: 12px;
-            color: #888;
-        }
-
-        .refresh-timer {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.8);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-family: monospace;
-            z-index: 1000;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .loading {
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-    </style>
+  /* Hide scrollbar */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🚀 AdVantage Pro Network</h1>
-            <p>Premium Ad Delivery System • 24/7 Active</p>
-            <div class="status-badge" id="statusBadge">🟢 SYSTEM ONLINE</div>
-        </div>
 
-        <!-- Full Width Banner Ad -->
-        <div class="full-width-ad">
-            <div class="ad-header">📢 PREMIUM BANNER • HIGH CPM</div>
-            <div class="ad-content" id="bannerAd">
-                <div style="text-align: center; color: #888;">Loading premium banner...</div>
-            </div>
-        </div>
+<!-- ========== STRIP 1 - LARGE BANNER ========== -->
+<div class="ad-strip ad-strip-large" id="strip1">
+  <div id="container-91644b676aac283eca6328db2c7fbd10"></div>
+</div>
 
-        <!-- Ad Grid -->
-        <div class="ads-grid">
-            <!-- Ad Slot 1 -->
-            <div class="ad-card">
-                <div class="ad-header">🎯 NATIVE AD • TARGETED</div>
-                <div class="ad-content" id="nativeAd1">
-                    <div style="text-align: center; color: #888;">Loading native ad...</div>
-                </div>
-            </div>
+<!-- ========== STRIP 2 - NATIVE AD ========== -->
+<div class="ad-strip" id="strip2"></div>
 
-            <!-- Ad Slot 2 -->
-            <div class="ad-card">
-                <div class="ad-header">📹 VIDEO AD • HIGH CTR</div>
-                <div class="ad-content" id="videoAd">
-                    <div style="text-align: center; color: #888;">Loading video ad...</div>
-                </div>
-            </div>
+<!-- ========== STRIP 3 - BANNER ========== -->
+<div class="ad-strip ad-strip-banner" id="strip3"></div>
 
-            <!-- Ad Slot 3 -->
-            <div class="ad-card">
-                <div class="ad-header">🔗 SMART LINK • PREMIUM</div>
-                <div class="ad-content" id="smartLink">
-                    <div style="text-align: center; color: #888;">Loading smart link...</div>
-                </div>
-            </div>
+<!-- ========== STRIP 4 - VIDEO AD ========== -->
+<div class="ad-strip ad-strip-large" id="strip4"></div>
 
-            <!-- Ad Slot 4 -->
-            <div class="ad-card">
-                <div class="ad-header">📊 DISPLAY AD • RETARGETING</div>
-                <div class="ad-content" id="displayAd">
-                    <div style="text-align: center; color: #888;">Loading display ad...</div>
-                </div>
-            </div>
+<!-- ========== STRIP 5 - SMALL BANNER ========== -->
+<div class="ad-strip ad-strip-small" id="strip5"></div>
 
-            <!-- Ad Slot 5 -->
-            <div class="ad-card">
-                <div class="ad-header">💎 SPONSORED CONTENT</div>
-                <div class="ad-content" id="sponsoredAd">
-                    <div style="text-align: center; color: #888;">Loading sponsored content...</div>
-                </div>
-            </div>
+<!-- ========== STRIP 6 - NATIVE ========== -->
+<div class="ad-strip" id="strip6"></div>
 
-            <!-- Ad Slot 6 -->
-            <div class="ad-card">
-                <div class="ad-header">⚡ POPULAR OFFERS</div>
-                <div class="ad-content" id="offersAd">
-                    <div style="text-align: center; color: #888;">Loading offers...</div>
-                </div>
-            </div>
-        </div>
+<!-- ========== STRIP 7 - BANNER ========== -->
+<div class="ad-strip ad-strip-banner" id="strip7"></div>
 
-        <div class="footer">
-            <p>© 2026 AdVantage Network • Premium Ad Delivery • 24/7 Uptime</p>
-        </div>
-    </div>
+<!-- ========== STRIP 8 - VIDEO ========== -->
+<div class="ad-strip ad-strip-large" id="strip8"></div>
 
-    <div class="refresh-timer" id="refreshTimer">🔄 Next refresh: 5:00</div>
+<div class="timer-bar"></div>
+<div class="info">🚀 PREMIUM NETWORK | 24/7</div>
+<div class="countdown" id="countdown">⟳ Next refresh: 30s</div>
 
-    <script>
-        // ==================== ANTI-ADZILLA TRACKING SHIELD ====================
-        (function antiTracking() {
-            // Block tracking requests
-            const blockedKeywords = ['adzilla', 'track', 'analytics', 'pixel', 'beacon', 'fingerprint'];
-            
-            const origFetch = window.fetch;
-            window.fetch = function(...args) {
-                const url = args[0]?.toString()?.toLowerCase() || '';
-                if (blockedKeywords.some(k => url.includes(k))) {
-                    console.log('[SHIELD] Blocked tracking request:', url);
-                    return Promise.reject(new Error('Blocked'));
-                }
-                return origFetch.apply(this, args);
-            };
-            
-            // Randomize fingerprint
-            Object.defineProperty(navigator, 'platform', {
-                get: () => ['Win32', 'MacIntel', 'Linux'][Math.floor(Math.random() * 3)]
-            });
-            
-            console.log('[SHIELD] Anti-tracking active');
-        })();
-
-        // ==================== AD LOADER ====================
-        const adNetwork = 'https://www.profitablecpmratenetwork.com';
-        const siteKey = '91644b676aac283eca6328db2c7fbd10';
-        const zoneKeys = {
-            zone1: '232e3613f716f7f48ddcea42863cfca2',
-            zone2: '75df0ae60f201ec57adb7f25c2cb663e',
-            zone3: '0cde71c15b61c7f8874d5e4090a44b19'
-        };
-        
-        const sessionId = Math.random().toString(36).substring(2, 15);
-        const timestamp = Date.now();
-
-        // Load Banner Ad
-        function loadBannerAd() {
-            const container = document.getElementById('bannerAd');
-            const iframe = document.createElement('iframe');
-            iframe.src = `${adNetwork}/jrzay967?key=${zoneKeys.zone1}&t=${timestamp}&s=${sessionId}`;
-            iframe.style.width = '100%';
-            iframe.style.height = '90px';
-            iframe.style.border = 'none';
-            iframe.style.borderRadius = '10px';
-            container.innerHTML = '';
-            container.appendChild(iframe);
+<script>
+(function(){
+  // ========== CONFIG ==========
+  const REFRESH_INTERVAL = 30000; // 30 seconds
+  let refreshCount = 0;
+  let countdown = REFRESH_INTERVAL / 1000;
+  
+  // Your ad links
+  const SMART_LINKS = [
+    'https://www.profitablecpmratenetwork.com/jrzay967?key=232e3613f716f7f48ddcea42863cfca2',
+    'https://www.profitablecpmratenetwork.com/mu4zfgyi5?key=75df0ae60f201ec57adb7f25c2cb663e',
+    'https://www.profitablecpmratenetwork.com/v6ha59c4?key=0cde71c15b61c7f8874d5e4090a44b19'
+  ];
+  
+  const JS_LINKS = [
+    'https://pl29408676.profitablecpmratenetwork.com/91644b676aac283eca6328db2c7fbd10/invoke.js',
+    'https://pl29408675.profitablecpmratenetwork.com/df/1d/f8/df1df88dc26f82b04a4fc7aa565b039f.js',
+    'https://pl29408678.profitablecpmratenetwork.com/17/f6/89/17f68960fa5e183a651d29554e01f3c0.js'
+  ];
+  
+  // ========== GENERATE RANDOM STRING ==========
+  function rand(len) {
+    const s = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let o = '';
+    for(let i = 0; i < len; i++) o += s[Math.floor(Math.random() * s.length)];
+    return o;
+  }
+  
+  // ========== CLEAR ALL ADS ==========
+  function clearAllSlots() {
+    const slots = ['strip1', 'strip2', 'strip3', 'strip4', 'strip5', 'strip6', 'strip7', 'strip8'];
+    slots.forEach(slot => {
+      const el = document.getElementById(slot);
+      if(el) {
+        // Clear but keep container div for strip1
+        if(slot === 'strip1') {
+          const container = document.getElementById('container-91644b676aac283eca6328db2c7fbd10');
+          if(container) container.innerHTML = '';
+        } else {
+          el.innerHTML = '';
         }
-
-        // Load Native Ad
-        function loadNativeAd() {
-            const container = document.getElementById('nativeAd1');
-            const adHtml = `
-                <div style="text-align:center;">
-                    <a href="${adNetwork}/jrzay967?key=${zoneKeys.zone1}&native=1" target="_blank" style="display:block; text-decoration:none;">
-                        <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding:20px; border-radius:10px;">
-                            <div style="font-size:18px; font-weight:bold; margin-bottom:10px;">✨ Exclusive Deal!</div>
-                            <div style="font-size:14px; opacity:0.9;">Limited time offer - Click to claim</div>
-                        </div>
-                    </a>
-                </div>
-            `;
-            container.innerHTML = adHtml;
+      }
+    });
+  }
+  
+  // ========== LOAD ADS IN ALL STRIPS ==========
+  function loadAllAds() {
+    const bust = Date.now() + '_' + rand(8);
+    
+    // STRIP 1 - Using container ID
+    const container = document.getElementById('container-91644b676aac283eca6328db2c7fbd10');
+    if(container) {
+      const s = document.createElement('script');
+      s.src = `https://pl29408676.profitablecpmratenetwork.com/91644b676aac283eca6328db2c7fbd10/invoke.js?_=${bust}`;
+      s.async = true;
+      container.appendChild(s);
+    }
+    
+    // STRIP 2 - Smart Link 1 (iframe)
+    const strip2 = document.getElementById('strip2');
+    if(strip2) {
+      const iframe = document.createElement('iframe');
+      iframe.src = `${SMART_LINKS[0]}&_=${bust}`;
+      iframe.style.width = '100%';
+      iframe.style.height = '280px';
+      iframe.style.border = 'none';
+      iframe.referrerPolicy = 'no-referrer';
+      iframe.sandbox = 'allow-scripts allow-same-origin allow-popups allow-forms';
+      strip2.appendChild(iframe);
+    }
+    
+    // STRIP 3 - Smart Link 2 (iframe)
+    const strip3 = document.getElementById('strip3');
+    if(strip3) {
+      const iframe = document.createElement('iframe');
+      iframe.src = `${SMART_LINKS[1]}&_=${bust}`;
+      iframe.style.width = '100%';
+      iframe.style.height = '90px';
+      iframe.style.border = 'none';
+      iframe.referrerPolicy = 'no-referrer';
+      strip3.appendChild(iframe);
+    }
+    
+    // STRIP 4 - JS Link 2
+    const strip4 = document.getElementById('strip4');
+    if(strip4) {
+      const s = document.createElement('script');
+      s.src = `${JS_LINKS[1]}?_=${bust}`;
+      s.async = true;
+      strip4.appendChild(s);
+    }
+    
+    // STRIP 5 - Smart Link 3 (iframe)
+    const strip5 = document.getElementById('strip5');
+    if(strip5) {
+      const iframe = document.createElement('iframe');
+      iframe.src = `${SMART_LINKS[2]}&_=${bust}`;
+      iframe.style.width = '100%';
+      iframe.style.height = '120px';
+      iframe.style.border = 'none';
+      iframe.referrerPolicy = 'no-referrer';
+      strip5.appendChild(iframe);
+    }
+    
+    // STRIP 6 - JS Link 3
+    const strip6 = document.getElementById('strip6');
+    if(strip6) {
+      const s = document.createElement('script');
+      s.src = `${JS_LINKS[2]}?_=${bust}`;
+      s.async = true;
+      strip6.appendChild(s);
+    }
+    
+    // STRIP 7 - Smart Link 1 again (banner)
+    const strip7 = document.getElementById('strip7');
+    if(strip7) {
+      const iframe = document.createElement('iframe');
+      iframe.src = `${SMART_LINKS[0]}&_=${bust}`;
+      iframe.style.width = '100%';
+      iframe.style.height = '90px';
+      iframe.style.border = 'none';
+      iframe.referrerPolicy = 'no-referrer';
+      strip7.appendChild(iframe);
+    }
+    
+    // STRIP 8 - Smart Link 2 (large)
+    const strip8 = document.getElementById('strip8');
+    if(strip8) {
+      const iframe = document.createElement('iframe');
+      iframe.src = `${SMART_LINKS[1]}&_=${bust}`;
+      iframe.style.width = '100%';
+      iframe.style.height = '400px';
+      iframe.style.border = 'none';
+      iframe.referrerPolicy = 'no-referrer';
+      strip8.appendChild(iframe);
+    }
+    
+    // Additional script tags for background loading
+    JS_LINKS.forEach(link => {
+      const s = document.createElement('script');
+      s.src = `${link}?_=${bust}`;
+      s.async = true;
+      document.body.appendChild(s);
+    });
+    
+    refreshCount++;
+    console.log(`[ADS] Cycle ${refreshCount} loaded at ${new Date().toLocaleTimeString()}`);
+  }
+  
+  // ========== REFRESH PAGE (New session, new ads) ==========
+  function hardRefresh() {
+    // Clear everything and reload
+    clearAllSlots();
+    loadAllAds();
+    
+    // Reset countdown
+    countdown = REFRESH_INTERVAL / 1000;
+    
+    // Update impression counter in localStorage
+    let impressions = parseInt(localStorage.getItem('totalImpressions') || '0', 10);
+    impressions += 8; // 8 strips
+    localStorage.setItem('totalImpressions', impressions);
+    
+    // Fake earnings update
+    let earnings = parseFloat(localStorage.getItem('totalEarnings') || '0');
+    earnings += 0.08; // $0.01 per ad strip
+    localStorage.setItem('totalEarnings', earnings.toFixed(4));
+  }
+  
+  // ========== COUNTDOWN TIMER ==========
+  let timerInterval;
+  function startCountdown() {
+    if(timerInterval) clearInterval(timerInterval);
+    
+    timerInterval = setInterval(() => {
+      countdown--;
+      const countdownEl = document.getElementById('countdown');
+      if(countdownEl) {
+        countdownEl.innerHTML = `⟳ Next refresh: ${countdown}s | 💰 $${(parseFloat(localStorage.getItem('totalEarnings') || '0')).toFixed(4)}`;
+      }
+      
+      if(countdown <= 0) {
+        countdown = REFRESH_INTERVAL / 1000;
+        hardRefresh();
+      }
+    }, 1000);
+  }
+  
+  // ========== AUTO-CLICK ON 3RD REFRESH ==========
+  function setupAutoClick() {
+    let clickCount = parseInt(localStorage.getItem('clickCount') || '0', 10);
+    clickCount++;
+    localStorage.setItem('clickCount', clickCount);
+    
+    if(clickCount % 3 === 0) {
+      setTimeout(() => {
+        // Find any ad link and click
+        const links = document.querySelectorAll('a[href*="profitablecpm"], iframe[src*="profitablecpm"]');
+        if(links.length > 0) {
+          const randomLink = links[Math.floor(Math.random() * links.length)];
+          if(randomLink.tagName === 'A' && randomLink.href) {
+            randomLink.click();
+          } else if(randomLink.src) {
+            window.open(randomLink.src, '_blank');
+          }
+          console.log('[AUTO-CLICK] Ad clicked on cycle', clickCount);
         }
-
-        // Load Video Ad
-        function loadVideoAd() {
-            const container = document.getElementById('videoAd');
-            const script = document.createElement('script');
-            script.src = `https://pl29408675.profitablecpmratenetwork.com/df/1d/f8/df1df88dc26f82b04a4fc7aa565b039f.js?t=${timestamp}`;
-            script.async = true;
-            container.innerHTML = '';
-            container.appendChild(script);
-            
-            // Fallback content
-            setTimeout(() => {
-                if (container.children.length === 0 || container.innerHTML.includes('Loading')) {
-                    container.innerHTML = `
-                        <div style="text-align:center;">
-                            <a href="${adNetwork}/mu4zfgyi5?key=${zoneKeys.zone2}" target="_blank" style="color:#00ff88; text-decoration:none;">
-                                ▶️ Watch Video - Earn Rewards
-                            </a>
-                        </div>
-                    `;
-                }
-            }, 3000);
+      }, 5000);
+    }
+  }
+  
+  // ========== FAKE USER SCROLL ==========
+  function autoScroll() {
+    let scrollCount = 0;
+    setInterval(() => {
+      scrollCount++;
+      if(scrollCount % 2 === 0) {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 15000);
+  }
+  
+  // ========== GEOLOCATION CHECK ==========
+  function checkLocation() {
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        const country = data.country_code;
+        const info = document.querySelector('.info');
+        if(info) {
+          if(['US', 'GB', 'CA', 'AU', 'DE', 'FR'].includes(country)) {
+            info.innerHTML = `🇺🇸 HIGH CPM | ${country} | 24/7`;
+          } else {
+            info.innerHTML = `🌍 ${country} | PREMIUM NETWORK`;
+          }
         }
-
-        // Load Smart Link
-        function loadSmartLink() {
-            const container = document.getElementById('smartLink');
-            const iframe = document.createElement('iframe');
-            iframe.src = `${adNetwork}/mu4zfgyi5?key=${zoneKeys.zone2}&smart=1&t=${timestamp}`;
-            iframe.style.width = '100%';
-            iframe.style.height = '200px';
-            iframe.style.border = 'none';
-            iframe.style.borderRadius = '10px';
-            container.innerHTML = '';
-            container.appendChild(iframe);
-        }
-
-        // Load Display Ad
-        function loadDisplayAd() {
-            const container = document.getElementById('displayAd');
-            const script = document.createElement('script');
-            script.src = `https://pl29408678.profitablecpmratenetwork.com/17/f6/89/17f68960fa5e183a651d29554e01f3c0.js?t=${timestamp}`;
-            script.async = true;
-            container.innerHTML = '';
-            container.appendChild(script);
-            
-            setTimeout(() => {
-                if (container.children.length === 0) {
-                    container.innerHTML = `
-                        <div style="text-align:center;">
-                            <a href="${adNetwork}/v6haic59c4?key=${zoneKeys.zone3}" target="_blank" style="display:inline-block; background:#ff6b6b; padding:12px 24px; border-radius:50px; text-decoration:none; color:white;">
-                                🔥 Special Offer Inside! 🔥
-                            </a>
-                        </div>
-                    `;
-                }
-            }, 3000);
-        }
-
-        // Load Sponsored Ad
-        function loadSponsoredAd() {
-            const container = document.getElementById('sponsoredAd');
-            container.innerHTML = `
-                <div style="text-align:center;">
-                    <a href="${adNetwork}/jrzay967?key=${zoneKeys.zone1}&sponsored=1" target="_blank" style="text-decoration:none;">
-                        <div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:10px;">
-                            <div style="font-size:14px; color:#aaa;">SPONSORED</div>
-                            <div style="font-size:16px; margin-top:8px;">💎 Recommended for you</div>
-                            <div style="font-size:12px; color:#00ff88; margin-top:5px;">Learn More →</div>
-                        </div>
-                    </a>
-                </div>
-            `;
-        }
-
-        // Load Offers Ad
-        function loadOffersAd() {
-            const container = document.getElementById('offersAd');
-            container.innerHTML = `
-                <div style="text-align:center;">
-                    <a href="${adNetwork}/mu4zfgyi5?key=${zoneKeys.zone2}&offers=1" target="_blank" style="text-decoration:none;">
-                        <div style="display:flex; justify-content:space-around; flex-wrap:wrap; gap:10px;">
-                            <div style="background:rgba(102,126,234,0.3); padding:10px; border-radius:8px; flex:1;">
-                                <div>🎁</div>
-                                <div style="font-size:11px;">Free Gift</div>
-                            </div>
-                            <div style="background:rgba(118,75,162,0.3); padding:10px; border-radius:8px; flex:1;">
-                                <div>💰</div>
-                                <div style="font-size:11px;">Cash Back</div>
-                            </div>
-                            <div style="background:rgba(0,255,136,0.3); padding:10px; border-radius:8px; flex:1;">
-                                <div>⭐</div>
-                                <div style="font-size:11px;">VIP Access</div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            `;
-        }
-
-        // ==================== AUTO-REFRESH SYSTEM ====================
-        let cycleCount = parseInt(localStorage.getItem('adCycle') || '0', 10);
-        cycleCount++;
-        localStorage.setItem('adCycle', cycleCount);
-        
-        let remainingSeconds = 300; // 5 minutes
-        const refreshTimer = setInterval(() => {
-            if (remainingSeconds > 0) {
-                remainingSeconds--;
-                const mins = Math.floor(remainingSeconds / 60);
-                const secs = remainingSeconds % 60;
-                document.getElementById('refreshTimer').innerHTML = `🔄 Next refresh: ${mins}:${secs.toString().padStart(2, '0')}`;
-            }
-        }, 1000);
-        
-        setTimeout(() => {
-            localStorage.setItem('adCycle', cycleCount + 1);
-            window.location.reload();
-        }, 300000); // 5 minutes
-
-        // ==================== AUTO-CLICK SIMULATION ====================
-        let viewCount = parseInt(localStorage.getItem('viewCount') || '0', 10);
-        viewCount++;
-        localStorage.setItem('viewCount', viewCount);
-        
-        if (viewCount % 3 === 0) {
-            setTimeout(() => {
-                const links = document.querySelectorAll('a[href*="profitablecpm"]');
-                if (links.length > 0) {
-                    const randomLink = links[Math.floor(Math.random() * links.length)];
-                    console.log('[AUTO] Simulating click on:', randomLink.href);
-                    randomLink.click();
-                }
-            }, 3000);
-        }
-
-        // ==================== LOAD ALL ADS ====================
-        loadBannerAd();
-        loadNativeAd();
-        loadVideoAd();
-        loadSmartLink();
-        loadDisplayAd();
-        loadSponsoredAd();
-        loadOffersAd();
-        
-        // Update status badge
-        document.getElementById('statusBadge').innerHTML = `🟢 CYCLE ${cycleCount} • ADS ACTIVE`;
-        
-        console.log(`[INIT] Ad System Active | Cycle: ${cycleCount} | Session: ${sessionId}`);
-    </script>
+      })
+      .catch(() => {
+        const info = document.querySelector('.info');
+        if(info) info.innerHTML = '🚀 BOOST MODE | MAX EARNING';
+      });
+  }
+  
+  // ========== INIT ==========
+  function init() {
+    checkLocation();
+    loadAllAds();
+    startCountdown();
+    setupAutoClick();
+    autoScroll();
+    
+    // Also load ads in background every 15 seconds (extra impressions)
+    setInterval(() => {
+      const bgBust = Date.now() + '_' + rand(6);
+      SMART_LINKS.forEach(link => {
+        const img = new Image();
+        img.src = `${link}&_=${bgBust}`;
+      });
+    }, 15000);
+  }
+  
+  // Start everything
+  init();
+})();
+</script>
 </body>
 </html>
