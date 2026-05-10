@@ -1,15 +1,14 @@
 {
   "name": "ads-system",
   "version": "1.0.0",
-  "description": "24/7 Premium Ad Network",
+  "description": "Ad system with US IP spoofing",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
-  },
-  "engines": {
-    "node": ">=16.x"
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "axios": "^1.6.0"
   }
 }
