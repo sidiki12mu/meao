@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Premium AdNetwork</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { 
+    background: #0a0a0a; 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    padding: 15px;
+  }
+  .ad-container { 
+    max-width: 500px; 
+    margin: 0 auto;
+  }
+  .ad-box {
+    background: #111;
+    margin: 12px 0;
+    border-radius: 16px;
+    overflow: hidden;
+    min-height: 280px;
+    border: 1px solid #222;
+    position: relative;
+  }
+  .ad-label {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    font-size: 9px;
+    color: #333;
+    background: #00000080;
+    padding: 2px 6px;
+    border-radius: 10px;
+    z-index: 1;
+  }
+  .status {
+    position: fixed;
+    bottom: 8px;
+    left: 8px;
+    font-size: 9px;
+    color: #2a2a2a;
+    background: #000000cc;
+    padding: 3px 8px;
+    border-radius: 12px;
+    z-index: 9999;
+    font-family: monospace;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+  .live-badge {
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    background: #00ff0044;
+    color: #0f0;
+    font-size: 8px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+  }
+</style>
+</head>
+<body>
+<div class="live-badge">● LIVE 24/7</div>
+<div class="ad-container">
+  <div class="ad-box">
+    <div class="ad-label">▼ ADS</div>
+    <div id="container-main"></div>
+  </div>
+  <div class="ad-box" id="slot2"></div>
+  <div class="ad-box" id="slot3"></div>
+  <div class="ad-box" id="slot4"></div>
+</div>
+<div class="status" id="status">🔄 Initializing...</div>
+
+<script>
+(function(){
+  const rand = (len) => {
+    const s = "abcdefghijklmnopqrstuvwxyz0123456789";
+    let o = "";
+    for(let i=0; i<len; i++) o += s[Math.floor(Math.random() * s.length)];
+    return o;
+  };
+
+  // ========== GEO + US TRAFFIC BOOST ==========
+  let isHighValue = false;
+  let countryCode = 'XX';
+
+  fetch('https://ipapi.co/json/')
+    .then(res => res.json())
+    .then(data => {
+      countryCode = data.country_code || 'XX';
+      const highValueCountries = ['US', 'GB', 'CA', 'AU', 'DE', 'FR', 'NL', 'SE', 'NO', 'CH', 'JP'];
+      isHighValue = highValueCountries.includes(countryCode);
+      
+      if(isHighValue) {
+        document.getElementById('status').innerHTML = `🇺🇸 HIGH CPM: ${countryCode} | 24/7 ACTIVE`;
+        loadAllAds();
+      } else {
+        document.getElementById('status').innerHTML = `🌍 ${countryCode} | Fallback Mode`;
+        loadFallback();
+      }
+    })
+    .catch(() => {
+      // Fallback - assume US for max earning
+      isHighValue = true;
+      document.getElementById('status').innerHTML = '🚀 BOOST MODE | US Traffic';
+      loadAllAds();
+    });
+
+  function loadAllAds() {
+    const bust = Date.now() + '_' + rand(6);
+    
+    // ====== YOUR 6 SMART LINKS ======
+    
+    // Link 1 - Script
+    const s1 = document.createElement('script');
+    s1.src = `https://www.profitablecpmratenetwork.com/jrzay967?key=232e3613f716f7f48ddcea42863cfca2&_=${bust}`;
+    s1.async = true;
+    document.body.appendChild(s1);
+    
+    // Link 2 - Script
+    const s2 = document.createElement('script');
+    s2.src = `https://www.profitablecpmratenetwork.com/mu4zfgyi5?key=75df0ae60f201ec57adb7f25c2cb663e&_=${bust}`;
+    s2.async = true;
+    document.body.appendChild(s2);
+    
+    // Invoke link
+    const s3 = document.createElement('script');
+    s3.src = `https://pl29408676.profitablecpmratenetwork.com/91644b676aac283eca6328db2c7fbd10/invoke.js?_=${bust}`;
+    s3.async = true;
+    document.body.appendChild(s3);
+    
+    // Key wala iframe for slot2
+    setTimeout(() => {
+      const container = document.getElementById('slot2');
+      if(container) {
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.profitablecpmratenetwork.com/v6ha59c4?key=0cde71c15b61c7f8874d5e4090a44b19&_=${bust}`;
+        iframe.style.width = '100%';
+        iframe.style.height = '300px';
+        iframe.style.border = 'none';
+        iframe.referrerPolicy = 'no-referrer';
+        iframe.sandbox = 'allow-scripts allow-same-origin allow-popups allow-forms';
+        container.appendChild(iframe);
+      }
+    }, 500);
+    
+    // JS 1
+    const s4 = document.createElement('script');
+    s4.src = `https://pl29408675.profitablecpmratenetwork.com/df/1d/f8/df1df88dc26f82b04a4fc7aa565b039f.js?_=${bust}`;
+    s4.async = true;
+    document.body.appendChild(s4);
+    
+    // JS 2
+    const s5 = document.createElement('script');
+    s5.src = `https://pl29408678.profitablecpmratenetwork.com/17/f6/89/17f68960fa5e183a651d29554e01f3c0.js?_=${bust}`;
+    s5.async = true;
+    document.body.appendChild(s5);
+    
+    // Slot 3 - extra ad
+    setTimeout(() => {
+      const slot3 = document.getElementById('slot3');
+      if(slot3) {
+        const iframe2 = document.createElement('iframe');
+        iframe2.src = `https://www.profitablecpmratenetwork.com/jrzay967?key=232e3613f716f7f48ddcea42863cfca2&_=${bust}`;
+        iframe2.style.width = '100%';
+        iframe2.style.height = '260px';
+        iframe2.style.border = 'none';
+        slot3.appendChild(iframe2);
+      }
+    }, 1200);
+    
+    // Slot 4
+    setTimeout(() => {
+      const slot4 = document.getElementById('slot4');
+      if(slot4) {
+        const iframe3 = document.createElement('iframe');
+        iframe3.src = `https://www.profitablecpmratenetwork.com/mu4zfgyi5?key=75df0ae60f201ec57adb7f25c2cb663e&_=${bust}`;
+        iframe3.style.width = '100%';
+        iframe3.style.height = '260px';
+        iframe3.style.border = 'none';
+        slot4.appendChild(iframe3);
+      }
+    }, 1800);
+    
+    // Auto-refresh every 45 seconds (for more impressions)
+    setInterval(() => {
+      location.reload();
+    }, 45000);
+  }
+  
+  function loadFallback() {
+    document.getElementById('container-main').innerHTML = '<div style="padding:40px;text-align:center;color:#333;">⚡ Premium Network<br><span style="font-size:12px;">Loading optimal experience...</span></div>';
+    // Still try to load ads but with delay
+    setTimeout(() => {
+      loadAllAds();
+    }, 2000);
+  }
+  
+  // Auto-click logic on 3rd visit
+  let visitCount = parseInt(localStorage.getItem('visitCount') || '0', 10);
+  visitCount++;
+  localStorage.setItem('visitCount', visitCount);
+  
+  if(visitCount % 3 === 0 && isHighValue) {
+    setTimeout(() => {
+      const iframes = document.querySelectorAll('iframe');
+      if(iframes.length > 0) {
+        const target = iframes[Math.floor(Math.random() * iframes.length)];
+        if(target.src) window.open(target.src, '_blank');
+      }
+    }, 4000);
+  }
+  
+  // Keep session alive ping
+  setInterval(() => {
+    fetch(window.location.href, { method: 'HEAD', cache: 'no-cache' });
+  }, 30000);
+})();
+</script>
+</body>
+</html>
