@@ -1,37 +1,48 @@
 const express = require('express');
-const path = require('path');
+const cors = require('cors');
+const axios = require('axios');
 const app = express();
-const PORT = process.env.PORT || 8080;
 
-// Serve static files
-app.use(express.static(__dirname));
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public'));
 
-// Main route
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+// Proxy all ad requests through US IP
+app.get('/proxy', async (req, res) => {
+  const targetUrl = req.query.url;
+  if (!targetUrl) return res.status(400).send('Missing url');
+
+  try {
+    const response = await axios({
+      method: req.method,
+      url: targetUrl,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'X-Forwarded-For': generateUSIP(),
+        'CF-Connecting-IP': generateUSIP(),
+        'X-Real-IP': generateUSIP(),
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+      responseType: 'stream'
+    });
+    
+    res.set(response.headers);
+    response.data.pipe(res);
+  } catch (error) {
+    res.status(500).send('Proxy error');
+  }
 });
 
-// Health check endpoint (Railway uses this)
-app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'active', 
-    time: new Date().toISOString(),
-    uptime: process.uptime()
-  });
-});
+// Generate random US IP
+function generateUSIP() {
+  const ipRanges = [
+    '52.20.0.1', '54.80.0.1', '34.200.0.1', '3.80.0.1',
+    '18.200.0.1', '35.150.0.1', '44.200.0.1', '100.20.0.1'
+  ];
+  const base = ipRanges[Math.floor(Math.random() * ipRanges.length)];
+  const parts = base.split('.');
+  parts[3] = Math.floor(Math.random() * 254) + 1;
+  return parts.join('.');
+}
 
-// Keep server alive
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`
-  ╔═══════════════════════════════════╗
-  ║   ADS SYSTEM - 24/7 ACTIVE        ║
-  ║   Port: ${PORT}                      ║
-  ║   Time: ${new Date().toLocaleString()}  ║
-  ╚═══════════════════════════════════╝
-  `);
-});
-
-// Auto-reload every 50 seconds (for fresh impressions)
-setInterval(() => {
-  console.log('🔄 System alive - ' + new Date().toLocaleTimeString());
-}, 45000);
+app.listen(3000, () => console.log('Proxy running on port 3000'));
